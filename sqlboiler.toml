@@ -1,0 +1,8 @@
+[psql]
+  dbname = "clickbait"
+  host   = "localhost"
+  port   = 5432
+  user   = "postgres"
+  pass   = "postgres"
+  schema = "public"
+  blacklist = ["migrations", "other"]

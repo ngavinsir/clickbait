@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -14,6 +15,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var jwtAuth = jwtauth.New("HS256", []byte("clickbait^secret"), nil)
+var UserIDCtxKey = &contextKey{"User_id"}
+
 // Register new user handler
 func Register(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +27,7 @@ func Register(db *sql.DB) http.HandlerFunc {
 			return
 		}
 		
-		hash, _ := HashPassword(data.Password)
+		hash, _ := hashPassword(data.Password)
 		user := &models.User{
 			ID: ksuid.New().String(),
 			Username: data.Username,
@@ -40,7 +44,7 @@ func Register(db *sql.DB) http.HandlerFunc {
 }
 
 // Login handler
-func Login(db *sql.DB, jwtAuth *jwtauth.JWTAuth) http.HandlerFunc {
+func Login(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data := &LoginRequest{}
 		if err := render.Bind(r, data); err != nil {
@@ -54,7 +58,7 @@ func Login(db *sql.DB, jwtAuth *jwtauth.JWTAuth) http.HandlerFunc {
 			return
 		}
 
-		if !CheckPasswordHash(data.Password, user.Password) {
+		if !checkPasswordHash(data.Password, user.Password) {
 			render.Render(w, r, ErrRender(errors.New("invalid password")))
 			return
 		}
@@ -64,14 +68,37 @@ func Login(db *sql.DB, jwtAuth *jwtauth.JWTAuth) http.HandlerFunc {
 	})
 }
 
-func HashPassword(password string) (string, error) {
+func hashPassword(password string) (string, error) {
     bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
     return string(bytes), err
 }
 
-func CheckPasswordHash(password, hash string) bool {
+func checkPasswordHash(password, hash string) bool {
     err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
     return err == nil
+}
+
+func AuthMiddleware(next http.Handler) http.Handler {
+	return jwtauth.Verifier(jwtAuth)(extractUserID(next))
+}
+
+func extractUserID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token, claims, err := jwtauth.FromContext(r.Context())
+
+		if err != nil {
+			http.Error(w, http.StatusText(401), 401)
+			return
+		}
+
+		if token == nil || !token.Valid {
+			http.Error(w, http.StatusText(401), 401)
+			return
+		}
+		
+		ctx := context.WithValue(r.Context(), UserIDCtxKey, claims["user_id"])
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 // User general struct
@@ -107,4 +134,8 @@ func (req *LoginRequest) Bind(r *http.Request) error {
 	}
 
 	return nil
+}
+
+type contextKey struct {
+	name string
 }

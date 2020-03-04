@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/go-chi/jwtauth"
 	_ "github.com/lib/pq"
 	"github.com/ngavinsir/clickbait/handlers"
 )
@@ -19,10 +18,12 @@ func main() {
 	db, err := setupDB()
 	handleErr(err)
 	
-	tokenAuth := jwtauth.New("HS256", []byte("clickbait^secret"), nil)
-
 	router.Post("/register", handlers.Register(db))
-	router.Post("/login", handlers.Login(db, tokenAuth))
+	router.Post("/login", handlers.Login(db))
+
+	router.Group(func(router chi.Router) {
+		router.Use(handlers.AuthMiddleware)
+	})
 
 	log.Println("Server started on :4040")
 	log.Fatal(http.ListenAndServe(":4040", router))

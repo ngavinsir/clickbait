@@ -6,6 +6,9 @@ import (
 	"github.com/go-chi/render"
 )
 
+const ErrInvalidUserID = "ERR_INVALID_USER_ID"
+const ErrMissingFields = "ERR_MISSING_FIELDS"
+
 type ErrResponse struct {
 	Err            error `json:"-"`
 	HTTPStatusCode int   `json:"-"`
@@ -25,6 +28,15 @@ func ErrInvalidRequest(err error) render.Renderer {
 		Err:            err,
 		HTTPStatusCode: 400,
 		StatusText:     "Invalid request",
+		ErrorText:      err.Error(),
+	}
+}
+
+func ErrUnauthorized(err error) render.Renderer {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: 401,
+		StatusText:     "Unauthorized",
 		ErrorText:      err.Error(),
 	}
 }

@@ -116,7 +116,7 @@ type RegisterRequest struct {
 // Bind RegisterRequest (Username, Password) [Required]
 func (req *RegisterRequest) Bind(r *http.Request) error {
 	if req.Username == "" || req.Password == "" {
-		return errors.New("missing required user fields")
+		return errors.New(ErrMissingFields)
 	}
 
 	return nil
@@ -130,7 +130,7 @@ type LoginRequest struct {
 // Bind LoginRequest (Username, Password) [Required]
 func (req *LoginRequest) Bind(r *http.Request) error {
 	if req.Username == "" || req.Password == "" {
-		return errors.New("missing required user fields")
+		return errors.New(ErrMissingFields)
 	}
 
 	return nil

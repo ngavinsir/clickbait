@@ -23,6 +23,8 @@ func main() {
 
 	router.Group(func(router chi.Router) {
 		router.Use(handlers.AuthMiddleware)
+
+		router.Post("/headline", handlers.AddHeadline(db))
 	})
 
 	log.Println("Server started on :4040")

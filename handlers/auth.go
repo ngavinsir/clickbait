@@ -63,7 +63,10 @@ func Login(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{"user_id": user.ID})
+		_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
+			"user_id": user.ID,
+			"username": user.Username,
+		})
 		render.JSON(w, r, tokenString)
 	})
 }

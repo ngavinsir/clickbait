@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	_ "github.com/lib/pq"
 	"github.com/ngavinsir/clickbait/handlers"
 )
@@ -17,7 +18,12 @@ func main() {
 
 	db, err := setupDB()
 	handleErr(err)
-	
+
+	cors := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+	})
+	router.Use(cors.Handler)
+
 	router.Post("/register", handlers.Register(db))
 	router.Post("/login", handlers.Login(db))
 

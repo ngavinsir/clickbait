@@ -30,6 +30,7 @@ func main() {
 		})
 
 		router.Post("/label", handlers.AddLabel(db))
+		router.Post("/clickbait", handlers.Clickbait(db))
 	})
 
 	log.Println("Server started on :4040")

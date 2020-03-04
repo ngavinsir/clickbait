@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/volatiletech/sqlboiler/queries"
 )
 
+// RandomHeadline handler
 func RandomHeadline(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
@@ -19,30 +21,16 @@ func RandomHeadline(db *sql.DB) http.HandlerFunc {
 			render.Render(w, r, ErrUnauthorized(errors.New(ErrInvalidUserID)))
 		}
 
-		headline := &Headline{}
-		err := queries.Raw(`
-			select h.id, h.value
-			from headlines h left join labels l on h.id = l.headline_id
-			where h.id not in (
-				select l.headline_id
-				from labels l
-				where l.user_id = $1
-				group by l.headline_id
-			)
-			group by h.id
-			having count(l.id) < $2
-			order by random()
-			limit 1
-		`, userID, 3).Bind(r.Context(), db, headline)
+		headline, err := GetRandomHeadline(r.Context(), db, userID)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
-			return
 		}
 
 		render.JSON(w, r, headline)
 	})
 }
 
+// AddHeadline handler
 func AddHeadline(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data := &AddHeadlineRequest{}
@@ -63,6 +51,31 @@ func AddHeadline(db *sql.DB) http.HandlerFunc {
 
 		render.JSON(w, r, headline)
 	})
+}
+
+// GetRandomHeadline which labeled less than 3 times and haven't labeled by the user before
+func GetRandomHeadline(ctx context.Context, db *sql.DB, userID string) (*Headline, error) {
+	headline := &Headline{}
+	err := queries.Raw(`
+		select h.id, h.value
+		from headlines h left join labels l on h.id = l.headline_id
+		where h.id not in (
+			select l.headline_id
+			from labels l
+			where l.user_id = $1
+			group by l.headline_id
+		)
+		group by h.id
+		having count(l.id) < $2
+		order by random()
+		limit 1
+	`, userID, 3).Bind(ctx, db, headline)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return headline, nil
 }
 
 type Headline struct {

@@ -19,10 +19,12 @@ func main() {
 	db, err := setupDB()
 	handleErr(err)
 
-	cors := cors.New(cors.Options{
+	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+    	AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 	})
-	router.Use(cors.Handler)
+	router.Use(c.Handler)
 
 	router.Post("/register", handlers.Register(db))
 	router.Post("/login", handlers.Login(db))

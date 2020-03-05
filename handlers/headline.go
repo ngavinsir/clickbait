@@ -54,7 +54,7 @@ func AddHeadline(db *sql.DB) http.HandlerFunc {
 }
 
 // GetRandomHeadline which labeled less than 3 times and haven't labeled by the user before
-func GetRandomHeadline(ctx context.Context, db *sql.DB, userID string) (*Headline, error) {
+func GetRandomHeadline(ctx context.Context, exec boil.ContextExecutor, userID string) (*Headline, error) {
 	headline := &Headline{}
 	err := queries.Raw(`
 		select h.id, h.value
@@ -69,7 +69,7 @@ func GetRandomHeadline(ctx context.Context, db *sql.DB, userID string) (*Headlin
 		having count(l.id) < $2
 		order by random()
 		limit 1
-	`, userID, 3).Bind(ctx, db, headline)
+	`, userID, 3).Bind(ctx, exec, headline)
 
 	if err != nil {
 		return nil, err

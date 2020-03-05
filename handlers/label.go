@@ -43,21 +43,20 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		_, err := insertLabel(r.Context(), db, data, userID)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-		}
+		tx, err := db.BeginTx(r.Context(), nil)
+		HandleErr(w, r, err)
 
-		headline, err := GetRandomHeadline(r.Context(), db, userID)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-		}
+		insertLabel(r.Context(), tx, data, userID)
+		headline, _ := GetRandomHeadline(r.Context(), tx, userID)
+
+		err = tx.Commit()
+		HandleErr(w, r, err)
 
 		render.JSON(w, r, headline)
 	})
 }
 
-func insertLabel(ctx context.Context, db *sql.DB, data *LabelRequest, userID string) (*models.Label, error) {
+func insertLabel(ctx context.Context, exec boil.ContextExecutor, data *LabelRequest, userID string) (*models.Label, error) {
 	label := &models.Label{
 		ID: ksuid.New().String(),
 		UserID: userID,
@@ -65,7 +64,7 @@ func insertLabel(ctx context.Context, db *sql.DB, data *LabelRequest, userID str
 		Value: data.Value,
 	}
 
-	if err := label.Insert(ctx, db, boil.Infer()); err != nil {
+	if err := label.Insert(ctx, exec, boil.Infer()); err != nil {
 		return nil, err
 	}
 

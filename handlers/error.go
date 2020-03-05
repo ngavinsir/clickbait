@@ -9,6 +9,13 @@ import (
 const ErrInvalidUserID = "ERR_INVALID_USER_ID"
 const ErrMissingFields = "ERR_MISSING_FIELDS"
 
+// HandleErr to handle common error
+func HandleErr(w http.ResponseWriter, r *http.Request, err error) {
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+	}
+}
+
 type ErrResponse struct {
 	Err            error `json:"-"`
 	HTTPStatusCode int   `json:"-"`

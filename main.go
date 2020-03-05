@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -41,7 +42,8 @@ func main() {
 		router.Post("/clickbait", handlers.Clickbait(db))
 	})
 
-	log.Println("Server started on :4040")
+	name, _ := os.Executable()
+	log.Printf("Server started on :4040, pid: %s", name)
 	log.Fatal(http.ListenAndServe(":4040", router))
 }
 

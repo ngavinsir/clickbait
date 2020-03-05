@@ -17,10 +17,6 @@ import (
 func RandomHeadline(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
-		if userID == "" {
-			render.Render(w, r, ErrUnauthorized(errors.New(ErrInvalidUserID)))
-			return
-		}
 
 		headline, err := GetRandomHeadline(r.Context(), db, userID)
 		if err != nil {

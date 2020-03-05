@@ -6,15 +6,8 @@ import (
 	"github.com/go-chi/render"
 )
 
-const ErrInvalidUserID = "ERR_INVALID_USER_ID"
-const ErrMissingFields = "ERR_MISSING_FIELDS"
-
-// HandleErr to handle common error
-func HandleErr(w http.ResponseWriter, r *http.Request, err error) {
-	if err != nil {
-		render.Render(w, r, ErrRender(err))
-	}
-}
+const ErrInvalidUserID = "INVALID_USER_ID"
+const ErrMissingReqFields = "MISSING_REQUEST_FIELDS"
 
 type ErrResponse struct {
 	Err            error `json:"-"`

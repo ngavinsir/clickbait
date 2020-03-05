@@ -39,7 +39,13 @@ func Register(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		render.JSON(w, r, user)
+		tokenString, err := loginLogic(r.Context(), db, data.User)
+		if err != nil {
+			render.Render(w, r, ErrRender(err))
+			return
+		}
+
+		render.JSON(w, r, tokenString)
 	})
 }
 
@@ -52,23 +58,32 @@ func Login(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		user, err := models.Users(models.UserWhere.Username.EQ(data.Username)).One(r.Context(), db)
+		tokenString, err := loginLogic(r.Context(), db, data.User)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
 		}
-
-		if !checkPasswordHash(data.Password, user.Password) {
-			render.Render(w, r, ErrRender(errors.New("invalid password")))
-			return
-		}
-
-		_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
-			"user_id": user.ID,
-			"username": user.Username,
-		})
+		
 		render.JSON(w, r, tokenString)
 	})
+}
+
+func loginLogic(ctx context.Context, exec boil.ContextExecutor, data *User) (string, error) {
+	user, err := models.Users(models.UserWhere.Username.EQ(data.Username)).One(ctx, exec)
+	if err != nil {
+		return "", err
+	}
+
+	if !checkPasswordHash(data.Password, user.Password) {
+		return "", errors.New("invalid password")
+	}
+
+	_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
+		"user_id": user.ID,
+		"username": user.Username,
+	})
+
+	return tokenString, nil
 }
 
 func hashPassword(password string) (string, error) {
@@ -119,7 +134,7 @@ type RegisterRequest struct {
 // Bind RegisterRequest (Username, Password) [Required]
 func (req *RegisterRequest) Bind(r *http.Request) error {
 	if req.Username == "" || req.Password == "" {
-		return errors.New(ErrMissingFields)
+		return errors.New(ErrMissingReqFields)
 	}
 
 	return nil
@@ -133,7 +148,7 @@ type LoginRequest struct {
 // Bind LoginRequest (Username, Password) [Required]
 func (req *LoginRequest) Bind(r *http.Request) error {
 	if req.Username == "" || req.Password == "" {
-		return errors.New(ErrMissingFields)
+		return errors.New(ErrMissingReqFields)
 	}
 
 	return nil

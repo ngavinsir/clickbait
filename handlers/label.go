@@ -26,6 +26,7 @@ func AddLabel(db *sql.DB) http.HandlerFunc {
 		label, err := insertLabel(r.Context(), db, data, userID)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
+			return
 		}
 
 		render.JSON(w, r, label)
@@ -44,13 +45,19 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 		}
 
 		tx, err := db.BeginTx(r.Context(), nil)
-		HandleErr(w, r, err)
+		if err != nil {
+			render.Render(w, r, ErrRender(err))
+			return
+		}
 
 		insertLabel(r.Context(), tx, data, userID)
 		headline, _ := GetRandomHeadline(r.Context(), tx, userID)
 
 		err = tx.Commit()
-		HandleErr(w, r, err)
+		if err != nil {
+			render.Render(w, r, ErrRender(err))
+			return
+		}
 
 		render.JSON(w, r, headline)
 	})
@@ -87,7 +94,7 @@ type LabelRequest struct {
 // Bind label request if value and headline_id are present
 func (req *LabelRequest) Bind(r *http.Request) error {
 	if req.Label == nil || req.Value == "" || req.HeadlineID == "" {
-		return errors.New(ErrMissingFields)
+		return errors.New(ErrMissingReqFields)
 	}
 
 	return nil

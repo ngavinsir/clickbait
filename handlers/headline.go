@@ -19,11 +19,13 @@ func RandomHeadline(db *sql.DB) http.HandlerFunc {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
 		if userID == "" {
 			render.Render(w, r, ErrUnauthorized(errors.New(ErrInvalidUserID)))
+			return
 		}
 
 		headline, err := GetRandomHeadline(r.Context(), db, userID)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
+			return
 		}
 
 		render.JSON(w, r, headline)
@@ -72,7 +74,7 @@ func GetRandomHeadline(ctx context.Context, exec boil.ContextExecutor, userID st
 	`, userID, 3).Bind(ctx, exec, headline)
 
 	if err != nil {
-		return nil, err
+		return &Headline{}, err
 	}
 
 	return headline, nil
@@ -89,7 +91,7 @@ type AddHeadlineRequest struct {
 
 func (req *AddHeadlineRequest) Bind(r *http.Request) error {
 	if req.Headline == nil || req.Value == "" {
-		return errors.New(ErrMissingFields)
+		return errors.New(ErrMissingReqFields)
 	}
 
 	return nil

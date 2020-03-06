@@ -44,6 +44,20 @@ func DeleteLabel(db *sql.DB) http.HandlerFunc {
 	})
 }
 
+func GetAllLabel(db *sql.DB) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(UserIDCtxKey).(string)
+
+		labels, err := model.GetAllLabel(r.Context(), db, userID)
+		if err != nil {
+			render.Render(w, r, ErrRender(err))
+			return
+		}
+
+		render.JSON(w, r, labels)
+	})
+}
+
 // Clickbait handler return new headline after labeled previous headline
 func Clickbait(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -55,16 +69,12 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		tx, err := db.BeginTx(r.Context(), nil)
+		_, err := model.InsertLabel(r.Context(), db, userID, data.HeadlineID, data.Value)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
 		}
-
-		model.InsertLabel(r.Context(), tx, userID, data.HeadlineID, data.Value)
-		headline, _ := model.GetRandomHeadline(r.Context(), tx, userID)
-
-		err = tx.Commit()
+		headline, err := model.GetRandomHeadline(r.Context(), db, userID)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return

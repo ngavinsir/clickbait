@@ -38,7 +38,10 @@ func main() {
 			router.Get("/random", handlers.RandomHeadline(db))
 		})
 
-		router.Post("/label", handlers.AddLabel(db))
+		router.Route("/label", func(router chi.Router) {
+			router.Get("/", handlers.GetAllLabel(db))
+			router.Post("/", handlers.AddLabel(db))
+		})
 
 		router.Route("/{labelID}", func(router chi.Router) {
 			router.Delete("/", handlers.DeleteLabel(db)) 

@@ -26,7 +26,7 @@ func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 func ErrInvalidRequest(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
-		HTTPStatusCode: 400,
+		HTTPStatusCode: 200,
 		StatusText:     "Invalid request",
 		ErrorText:      err.Error(),
 	}
@@ -35,7 +35,7 @@ func ErrInvalidRequest(err error) render.Renderer {
 func ErrUnauthorized(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
-		HTTPStatusCode: 401,
+		HTTPStatusCode: 200,
 		StatusText:     "Unauthorized",
 		ErrorText:      err.Error(),
 	}
@@ -44,7 +44,7 @@ func ErrUnauthorized(err error) render.Renderer {
 func ErrRender(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
-		HTTPStatusCode: 422,
+		HTTPStatusCode: 200,
 		StatusText:     "Error rendering response.",
 		ErrorText:      err.Error(),
 	}

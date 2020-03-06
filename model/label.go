@@ -45,6 +45,15 @@ func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string)
 	return nil
 }
 
+func GetAllLabel(ctx context.Context, exec boil.ContextExecutor, userID string) (*models.LabelSlice, error) {
+	labels, err := models.Labels(models.LabelWhere.UserID.EQ(userID)).All(ctx, exec)
+	if err != nil {
+		return nil, err
+	}
+
+	return &labels, nil
+}
+
 // GetHeadlineLabelCount return label count by headline id
 func GetHeadlineLabelCount(ctx context.Context, exec boil.ContextExecutor, headlineID string) (int64, error) {
 	labelCount, err := models.Labels(models.LabelWhere.HeadlineID.EQ(headlineID)).Count(ctx, exec)

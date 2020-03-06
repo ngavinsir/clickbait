@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/ngavinsir/clickbait/model"
 )
@@ -30,6 +31,19 @@ func AddLabel(db *sql.DB) http.HandlerFunc {
 	})
 }
 
+// DeleteLabel handler
+func DeleteLabel(db *sql.DB) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if labelID := chi.URLParam(r, "labelID"); labelID != "" {
+			err := model.DeleteLabel(r.Context(), db, labelID)
+			if err != nil {
+				render.Render(w, r, ErrRender(err))
+				return
+			}
+		}
+	})
+}
+
 // Clickbait handler return new headline after labeled previous headline
 func Clickbait(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +62,7 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 		}
 
 		model.InsertLabel(r.Context(), tx, userID, data.HeadlineID, data.Value)
-		headline, _ := GetRandomHeadline(r.Context(), tx, userID)
+		headline, _ := model.GetRandomHeadline(r.Context(), tx, userID)
 
 		err = tx.Commit()
 		if err != nil {

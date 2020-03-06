@@ -35,6 +35,16 @@ func InsertLabel(ctx context.Context, exec boil.ContextExecutor,
 		return label, nil
 }
 
+// DeleteLabel helper
+func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string) error {
+	_, err := models.Labels(models.LabelWhere.ID.EQ(labelID)).DeleteAll(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // GetHeadlineLabelCount return label count by headline id
 func GetHeadlineLabelCount(ctx context.Context, exec boil.ContextExecutor, headlineID string) (int64, error) {
 	labelCount, err := models.Labels(models.LabelWhere.HeadlineID.EQ(headlineID)).Count(ctx, exec)

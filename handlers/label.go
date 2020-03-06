@@ -1,15 +1,12 @@
 package handlers
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"net/http"
 
 	"github.com/go-chi/render"
-	"github.com/ngavinsir/clickbait/models"
-	"github.com/segmentio/ksuid"
-	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/ngavinsir/clickbait/model"
 )
 
 // AddLabel handler
@@ -23,7 +20,7 @@ func AddLabel(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		label, err := insertLabel(r.Context(), db, data, userID)
+		label, err := model.InsertLabel(r.Context(), db, userID, data.HeadlineID, data.Value)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
@@ -50,7 +47,7 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		insertLabel(r.Context(), tx, data, userID)
+		model.InsertLabel(r.Context(), tx, userID, data.HeadlineID, data.Value)
 		headline, _ := GetRandomHeadline(r.Context(), tx, userID)
 
 		err = tx.Commit()
@@ -61,21 +58,6 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 
 		render.JSON(w, r, headline)
 	})
-}
-
-func insertLabel(ctx context.Context, exec boil.ContextExecutor, data *LabelRequest, userID string) (*models.Label, error) {
-	label := &models.Label{
-		ID: ksuid.New().String(),
-		UserID: userID,
-		HeadlineID: data.HeadlineID,
-		Value: data.Value,
-	}
-
-	if err := label.Insert(ctx, exec, boil.Infer()); err != nil {
-		return nil, err
-	}
-
-	return label, nil
 }
 
 // Label generat struct

@@ -48,6 +48,7 @@ func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string)
 	return nil
 }
 
+// GetHeadlineLabel return all label by user_id with the headline value
 func GetHeadlineLabel(ctx context.Context, exec boil.ContextExecutor, userID string) ([]*HeadlineLabel, error) {
 	data := []*HeadlineLabel{}
 	err := models.NewQuery(
@@ -79,6 +80,7 @@ func GetHeadlineLabelCount(ctx context.Context, exec boil.ContextExecutor, headl
 	return labelCount, nil
 }
 
+// HeadlineLabel contains label_id, headline_id, headline_value, label_value, label_updated_at
 type HeadlineLabel struct {
 	ID				string		`boil:"id" json:"id"`
 	HeadlineID		string		`boil:"headline_id" json:"headline_id"`

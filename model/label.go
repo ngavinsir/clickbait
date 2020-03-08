@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"errors"
+	"sort"
 	"time"
 
 	"github.com/ngavinsir/clickbait/models"
@@ -60,6 +61,10 @@ func GetHeadlineLabel(ctx context.Context, exec boil.ContextExecutor, userID str
 	if err != nil {
 		return nil, err
 	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].LabelUpdatedAt.After(data[j].LabelUpdatedAt)
+	})
 
 	return data, nil
 }

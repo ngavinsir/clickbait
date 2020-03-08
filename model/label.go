@@ -7,6 +7,7 @@ import (
 	"github.com/ngavinsir/clickbait/models"
 	"github.com/segmentio/ksuid"
 	"github.com/volatiletech/sqlboiler/boil"
+	. "github.com/volatiletech/sqlboiler/queries/qm"
 )
 
 // InsertLabel with maximum of 3 labels per headline
@@ -45,13 +46,20 @@ func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string)
 	return nil
 }
 
-func GetAllLabel(ctx context.Context, exec boil.ContextExecutor, userID string) (*models.LabelSlice, error) {
-	labels, err := models.Labels(models.LabelWhere.UserID.EQ(userID)).All(ctx, exec)
+func GetHeadlineLabel(ctx context.Context, exec boil.ContextExecutor, userID string) (*[]HeadlineLabel, error) {
+	var data []HeadlineLabel
+	err := models.NewQuery(
+		Select("labels.id as id", "headlines.id as headline_id",
+		"headlines.value as headline_value", "labels.value as label_value"),
+		From("labels"),
+		InnerJoin("headlines on labels.headline_id = headlines.id"),
+		models.LabelWhere.UserID.EQ(userID),
+	).Bind(ctx, exec, &data)
 	if err != nil {
 		return nil, err
 	}
 
-	return &labels, nil
+	return &data, nil
 }
 
 // GetHeadlineLabelCount return label count by headline id
@@ -62,4 +70,11 @@ func GetHeadlineLabelCount(ctx context.Context, exec boil.ContextExecutor, headl
 	}
 
 	return labelCount, nil
+}
+
+type HeadlineLabel struct {
+	ID				string	`boil:"id" json:"id"`
+	HeadlineID		string	`boil:"headline_id" json:"headline_id"`
+	HeadlineValue	string	`boil:"headline_value" json:"headline_value"`
+	LabelValue		string	`boil:"label_value" json:"label_value"`
 }

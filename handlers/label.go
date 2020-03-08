@@ -73,18 +73,18 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		_, err := model.InsertLabel(r.Context(), db, userID, data.HeadlineID, data.Value)
+		response := &ClickbaitResponse{}
+		label, err := model.InsertLabel(r.Context(), db, userID, data.HeadlineID, data.Value)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
 		}
-		headline, err := model.GetRandomHeadline(r.Context(), db, userID)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-			return
-		}
+		response.LabelID = label.ID
 
-		render.JSON(w, r, headline)
+		headline, _ := model.GetRandomHeadline(r.Context(), db, userID)
+		response.Headline = headline
+
+		render.JSON(w, r, response)
 	})
 }
 
@@ -100,4 +100,9 @@ func (req *LabelRequest) Bind(r *http.Request) error {
 	}
 
 	return nil
+}
+
+type ClickbaitResponse struct {
+	LabelID 			string	`boil:"label_id" json:"label_id"`
+	*models.Headline			`boil:"new_headline" json:"new_headline"`
 }

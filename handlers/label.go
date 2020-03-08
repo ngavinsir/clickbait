@@ -41,6 +41,8 @@ func DeleteLabel(db *sql.DB) http.HandlerFunc {
 				render.Render(w, r, ErrRender(err))
 				return
 			}
+		} else {
+			render.Render(w, r, ErrRender(errors.New(ErrMissingReqFields)))
 		}
 	})
 }

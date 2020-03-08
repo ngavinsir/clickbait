@@ -6,9 +6,13 @@ import (
 	"github.com/go-chi/render"
 )
 
-const ErrInvalidUserID = "INVALID_USER_ID"
-const ErrMissingReqFields = "MISSING_REQUEST_FIELDS"
+// common error message
+const (
+	ErrInvalidUserID = "INVALID_USER_ID"
+	ErrMissingReqFields = "MISSING_REQUEST_FIELDS"
+)
 
+// ErrResponse contains err, http_status_code, status_text, app_code, error_text
 type ErrResponse struct {
 	Err            error `json:"-"`
 	HTTPStatusCode int   `json:"-"`
@@ -18,11 +22,13 @@ type ErrResponse struct {
 	ErrorText  string `json:"error,omitempty"` 
 }
 
+// Render error response
 func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.HTTPStatusCode)
 	return nil
 }
 
+// ErrInvalidRequest to render invalid request error
 func ErrInvalidRequest(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
@@ -32,6 +38,7 @@ func ErrInvalidRequest(err error) render.Renderer {
 	}
 }
 
+// ErrUnauthorized to render unathorized error
 func ErrUnauthorized(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
@@ -41,6 +48,7 @@ func ErrUnauthorized(err error) render.Renderer {
 	}
 }
 
+// ErrRender to render common error
 func ErrRender(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,

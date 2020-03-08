@@ -44,10 +44,12 @@ func AddHeadline(db *sql.DB) http.HandlerFunc {
 	})
 }
 
+// AddHeadlineRequest struct
 type AddHeadlineRequest struct {
 	*models.Headline
 }
 
+// Bind add headline request if headline_value is not missing
 func (req *AddHeadlineRequest) Bind(r *http.Request) error {
 	if req.Headline == nil || req.Value == "" {
 		return errors.New(ErrMissingReqFields)

@@ -16,6 +16,8 @@ import (
 )
 
 var jwtAuth = jwtauth.New("HS256", []byte("clickbait^secret"), nil)
+
+// UserIDCtxKey to extract user id from context
 var UserIDCtxKey = &contextKey{"User_id"}
 
 // Register new user handler
@@ -96,6 +98,7 @@ func checkPasswordHash(password, hash string) bool {
     return err == nil
 }
 
+// AuthMiddleware to handle request jwt token
 func AuthMiddleware(next http.Handler) http.Handler {
 	return jwtauth.Verifier(jwtAuth)(extractUserID(next))
 }

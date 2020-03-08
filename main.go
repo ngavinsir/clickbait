@@ -48,10 +48,9 @@ func main() {
 		router.Route("/label", func(router chi.Router) {
 			router.Get("/", handlers.GetAllLabel(db))
 			router.Post("/", handlers.AddLabel(db))
-		})
-
-		router.Route("/{labelID}", func(router chi.Router) {
-			router.Delete("/", handlers.DeleteLabel(db)) 
+			router.Route("/{labelID}", func(router chi.Router) {
+				router.Delete("/", handlers.DeleteLabel(db)) 
+			})
 		})
 
 		router.Post("/clickbait", handlers.Clickbait(db))

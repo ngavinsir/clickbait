@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/ngavinsir/clickbait/model"
+	"github.com/ngavinsir/clickbait/models"
 )
 
 // AddLabel handler
@@ -85,17 +86,9 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 	})
 }
 
-// Label generat struct
-type Label struct {
-	ID			string `json:"id"`
-	UserID		string `json:"user_id"`
-	HeadlineID	string `json:"headline_id"`
-	Value		string `json:"value"`
-}
-
 // LabelRequest for add label handler request
 type LabelRequest struct {
-	*Label
+	*models.Label
 }
 
 // Bind label request if value and headline_id are present

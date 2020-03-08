@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/ngavinsir/clickbait/model"
+	"github.com/ngavinsir/clickbait/models"
 )
 
 // RandomHeadline handler
@@ -43,13 +44,8 @@ func AddHeadline(db *sql.DB) http.HandlerFunc {
 	})
 }
 
-type Headline struct {
-	ID    string `json:"id"`
-	Value string `json:"value"`
-}
-
 type AddHeadlineRequest struct {
-	*Headline
+	*models.Headline
 }
 
 func (req *AddHeadlineRequest) Bind(r *http.Request) error {

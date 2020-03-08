@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"encoding/csv"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +13,8 @@ import (
 	"github.com/go-chi/cors"
 	_ "github.com/lib/pq"
 	"github.com/ngavinsir/clickbait/handlers"
+	"github.com/ngavinsir/clickbait/model"
+	"github.com/volatiletech/sqlboiler/boil"
 )
 
 //go:generate sqlboiler --wipe psql
@@ -19,6 +24,8 @@ func main() {
 
 	db, err := setupDB()
 	handleErr(err)
+
+	//inputDataset("./dataset/cnn.csv", db)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -63,4 +70,41 @@ func handleErr(err error) {
 
 func setupDB() (*sql.DB, error) {
 	return sql.Open("postgres", `dbname=clickbait host=localhost user=postgres password=postgres`)
+}
+
+func inputDataset(datasetPath string, exec boil.ContextExecutor) {
+	csvfile, err := os.Open(datasetPath)
+	if err != nil {
+		log.Fatalln("Couldn't open the csv file", err)
+	}
+
+	i := 0
+	for row := range processCSV(csvfile) {
+		i++
+		log.Printf("%d\n", i)
+		model.InsertHeadline(context.Background(), exec, row[2])
+	}
+}
+
+func processCSV(rc io.Reader) (ch chan []string) {
+    ch = make(chan []string, 10)
+    go func() {
+        r := csv.NewReader(rc)
+        if _, err := r.Read(); err != nil { //read header
+            log.Fatal(err)
+        }
+        defer close(ch)
+        for {
+            rec, err := r.Read()
+            if err != nil {
+                if err == io.EOF {
+                    break
+                }
+                log.Fatal(err)
+
+            }
+            ch <- rec
+        }
+    }()
+    return
 }

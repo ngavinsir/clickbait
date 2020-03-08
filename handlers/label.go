@@ -51,7 +51,7 @@ func DeleteLabel(db *sql.DB) http.HandlerFunc {
 func GetAllLabel(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
-		
+
 		labels := []*model.HeadlineLabel{}
 		labels, err := model.GetHeadlineLabel(r.Context(), db, userID)
 		if err != nil {
@@ -105,6 +105,6 @@ func (req *LabelRequest) Bind(r *http.Request) error {
 
 // ClickbaitResponse contains label_id and new_headline
 type ClickbaitResponse struct {
-	LabelID 			string	`boil:"label_id" json:"label_id"`
-	*models.Headline			`boil:"new_headline" json:"new_headline"`
+	LabelID          string `boil:"label_id" json:"label_id"`
+	*models.Headline `boil:"new_headline" json:"new_headline"`
 }

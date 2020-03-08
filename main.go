@@ -28,9 +28,9 @@ func main() {
 	//inputDataset("./dataset/cnn.csv", db)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-    	AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 	})
 	router.Use(c.Handler)
 
@@ -49,7 +49,7 @@ func main() {
 			router.Get("/", handlers.GetAllLabel(db))
 			router.Post("/", handlers.AddLabel(db))
 			router.Route("/{labelID}", func(router chi.Router) {
-				router.Delete("/", handlers.DeleteLabel(db)) 
+				router.Delete("/", handlers.DeleteLabel(db))
 			})
 		})
 
@@ -86,24 +86,24 @@ func inputDataset(datasetPath string, exec boil.ContextExecutor) {
 }
 
 func processCSV(rc io.Reader) (ch chan []string) {
-    ch = make(chan []string, 10)
-    go func() {
-        r := csv.NewReader(rc)
-        if _, err := r.Read(); err != nil { //read header
-            log.Fatal(err)
-        }
-        defer close(ch)
-        for {
-            rec, err := r.Read()
-            if err != nil {
-                if err == io.EOF {
-                    break
-                }
-                log.Fatal(err)
+	ch = make(chan []string, 10)
+	go func() {
+		r := csv.NewReader(rc)
+		if _, err := r.Read(); err != nil { //read header
+			log.Fatal(err)
+		}
+		defer close(ch)
+		for {
+			rec, err := r.Read()
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				log.Fatal(err)
 
-            }
-            ch <- rec
-        }
-    }()
-    return
+			}
+			ch <- rec
+		}
+	}()
+	return
 }

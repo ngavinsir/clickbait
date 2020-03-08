@@ -13,29 +13,29 @@ import (
 )
 
 // InsertLabel with maximum of 3 labels per headline
-func InsertLabel(ctx context.Context, exec boil.ContextExecutor, 
+func InsertLabel(ctx context.Context, exec boil.ContextExecutor,
 	userID string, headlineID string, value string) (*models.Label, error) {
-		headlineLabelCount, err := GetHeadlineLabelCount(ctx, exec, headlineID)
-		if err != nil {
-			return nil, err
-		}
+	headlineLabelCount, err := GetHeadlineLabelCount(ctx, exec, headlineID)
+	if err != nil {
+		return nil, err
+	}
 
-		if headlineLabelCount >= 3 {
-			return nil, errors.New("maximum label reached")
-		}
+	if headlineLabelCount >= 3 {
+		return nil, errors.New("maximum label reached")
+	}
 
-		label := &models.Label{
-			ID: ksuid.New().String(),
-			UserID: userID,
-			HeadlineID: headlineID,
-			Value: value,
-		}
+	label := &models.Label{
+		ID:         ksuid.New().String(),
+		UserID:     userID,
+		HeadlineID: headlineID,
+		Value:      value,
+	}
 
-		if err := label.Insert(ctx, exec, boil.Infer()); err != nil {
-			return nil, err
-		}
+	if err := label.Insert(ctx, exec, boil.Infer()); err != nil {
+		return nil, err
+	}
 
-		return label, nil
+	return label, nil
 }
 
 // DeleteLabel helper
@@ -82,9 +82,9 @@ func GetHeadlineLabelCount(ctx context.Context, exec boil.ContextExecutor, headl
 
 // HeadlineLabel contains label_id, headline_id, headline_value, label_value, label_updated_at
 type HeadlineLabel struct {
-	ID				string		`boil:"id" json:"id"`
-	HeadlineID		string		`boil:"headline_id" json:"headline_id"`
-	HeadlineValue	string		`boil:"headline_value" json:"headline_value"`
-	LabelValue		string		`boil:"label_value" json:"label_value"`
-	LabelUpdatedAt	time.Time	`boil:"label_updated_at" json:"label_updated_at"`
+	ID             string    `boil:"id" json:"id"`
+	HeadlineID     string    `boil:"headline_id" json:"headline_id"`
+	HeadlineValue  string    `boil:"headline_value" json:"headline_value"`
+	LabelValue     string    `boil:"label_value" json:"label_value"`
+	LabelUpdatedAt time.Time `boil:"label_updated_at" json:"label_updated_at"`
 }

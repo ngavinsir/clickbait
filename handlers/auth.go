@@ -28,14 +28,14 @@ func Register(db *sql.DB) http.HandlerFunc {
 			render.Render(w, r, ErrInvalidRequest(err))
 			return
 		}
-		
+
 		hash, _ := hashPassword(data.Password)
 		user := &models.User{
-			ID: ksuid.New().String(),
+			ID:       ksuid.New().String(),
 			Username: data.Username,
 			Password: hash,
 		}
-		
+
 		if err := user.Insert(r.Context(), db, boil.Infer()); err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
@@ -65,7 +65,7 @@ func Login(db *sql.DB) http.HandlerFunc {
 			render.Render(w, r, ErrRender(err))
 			return
 		}
-		
+
 		render.JSON(w, r, tokenString)
 	})
 }
@@ -81,7 +81,7 @@ func loginLogic(ctx context.Context, exec boil.ContextExecutor, data *User) (str
 	}
 
 	_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
-		"user_id": user.ID,
+		"user_id":  user.ID,
 		"username": user.Username,
 	})
 
@@ -89,13 +89,13 @@ func loginLogic(ctx context.Context, exec boil.ContextExecutor, data *User) (str
 }
 
 func hashPassword(password string) (string, error) {
-    bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
-    return string(bytes), err
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	return string(bytes), err
 }
 
 func checkPasswordHash(password, hash string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-    return err == nil
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 // AuthMiddleware to handle request jwt token
@@ -116,7 +116,7 @@ func extractUserID(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(401), 401)
 			return
 		}
-		
+
 		ctx := context.WithValue(r.Context(), UserIDCtxKey, claims["user_id"])
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -124,9 +124,9 @@ func extractUserID(next http.Handler) http.Handler {
 
 // User general struct
 type User struct {
-	ID     		string `json:"id,omitempty"`
-	Username  	string `json:"username"`
-	Password	string `json:"password,omitempty"`
+	ID       string `json:"id,omitempty"`
+	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
 }
 
 // RegisterRequest struct

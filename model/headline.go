@@ -11,8 +11,16 @@ import (
 
 // InsertHeadline with value
 func InsertHeadline(ctx context.Context, exec boil.ContextExecutor, value string) (*models.Headline, error) {
+	return insertHeadlineWithID(ctx, exec, ksuid.New().String(), value)
+}
+
+func insertHeadlineWithID(ctx context.Context, exec boil.ContextExecutor, id string, value string) (*models.Headline, error) {
+	if id == "" {
+		id = ksuid.New().String()
+	}
+
 	headline := &models.Headline{
-		ID: ksuid.New().String(),
+		ID:    id,
 		Value: value,
 	}
 

@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/ngavinsir/clickbait/models"
 	"github.com/segmentio/ksuid"
@@ -46,11 +47,12 @@ func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string)
 	return nil
 }
 
-func GetHeadlineLabel(ctx context.Context, exec boil.ContextExecutor, userID string) (*[]HeadlineLabel, error) {
-	var data []HeadlineLabel
+func GetHeadlineLabel(ctx context.Context, exec boil.ContextExecutor, userID string) ([]*HeadlineLabel, error) {
+	data := []*HeadlineLabel{}
 	err := models.NewQuery(
 		Select("labels.id as id", "headlines.id as headline_id",
-		"headlines.value as headline_value", "labels.value as label_value"),
+			"headlines.value as headline_value", "labels.value as label_value",
+			"labels.updated_at as label_updated_at"),
 		From("labels"),
 		InnerJoin("headlines on labels.headline_id = headlines.id"),
 		models.LabelWhere.UserID.EQ(userID),
@@ -59,7 +61,7 @@ func GetHeadlineLabel(ctx context.Context, exec boil.ContextExecutor, userID str
 		return nil, err
 	}
 
-	return &data, nil
+	return data, nil
 }
 
 // GetHeadlineLabelCount return label count by headline id
@@ -73,8 +75,9 @@ func GetHeadlineLabelCount(ctx context.Context, exec boil.ContextExecutor, headl
 }
 
 type HeadlineLabel struct {
-	ID				string	`boil:"id" json:"id"`
-	HeadlineID		string	`boil:"headline_id" json:"headline_id"`
-	HeadlineValue	string	`boil:"headline_value" json:"headline_value"`
-	LabelValue		string	`boil:"label_value" json:"label_value"`
+	ID				string		`boil:"id" json:"id"`
+	HeadlineID		string		`boil:"headline_id" json:"headline_id"`
+	HeadlineValue	string		`boil:"headline_value" json:"headline_value"`
+	LabelValue		string		`boil:"label_value" json:"label_value"`
+	LabelUpdatedAt	time.Time	`boil:"label_updated_at" json:"label_updated_at"`
 }

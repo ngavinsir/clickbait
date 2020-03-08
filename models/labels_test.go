@@ -785,7 +785,7 @@ func testLabelsSelect(t *testing.T) {
 }
 
 var (
-	labelDBTypes = map[string]string{`ID`: `character varying`, `UserID`: `character varying`, `HeadlineID`: `character varying`, `Value`: `character varying`}
+	labelDBTypes = map[string]string{`ID`: `character varying`, `UserID`: `character varying`, `HeadlineID`: `character varying`, `Value`: `character varying`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`}
 	_            = bytes.MinRead
 )
 

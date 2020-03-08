@@ -47,7 +47,8 @@ func DeleteLabel(db *sql.DB) http.HandlerFunc {
 func GetAllLabel(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
-
+		
+		labels := []*model.HeadlineLabel{}
 		labels, err := model.GetHeadlineLabel(r.Context(), db, userID)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))

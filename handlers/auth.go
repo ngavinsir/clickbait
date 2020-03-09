@@ -70,7 +70,7 @@ func Login(db *sql.DB) http.HandlerFunc {
 	})
 }
 
-func loginLogic(ctx context.Context, exec boil.ContextExecutor, data *User) (string, error) {
+func loginLogic(ctx context.Context, exec boil.ContextExecutor, data *models.User) (string, error) {
 	user, err := models.Users(models.UserWhere.Username.EQ(data.Username)).One(ctx, exec)
 	if err != nil {
 		return "", err
@@ -122,16 +122,9 @@ func extractUserID(next http.Handler) http.Handler {
 	})
 }
 
-// User general struct
-type User struct {
-	ID       string `json:"id,omitempty"`
-	Username string `json:"username"`
-	Password string `json:"password,omitempty"`
-}
-
 // RegisterRequest struct
 type RegisterRequest struct {
-	*User
+	*models.User
 }
 
 // Bind RegisterRequest (Username, Password) [Required]
@@ -145,7 +138,7 @@ func (req *RegisterRequest) Bind(r *http.Request) error {
 
 // LoginRequest struct
 type LoginRequest struct {
-	*User
+	*models.User
 }
 
 // Bind LoginRequest (Username, Password) [Required]

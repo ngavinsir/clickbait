@@ -10,7 +10,7 @@ import (
 	"github.com/ngavinsir/clickbait/models"
 	"github.com/segmentio/ksuid"
 	"github.com/volatiletech/sqlboiler/boil"
-	. "github.com/volatiletech/sqlboiler/queries/qm"
+	"github.com/volatiletech/sqlboiler/queries"
 )
 
 // InsertLabel with maximum of 3 labels per headline
@@ -97,15 +97,14 @@ func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string,
 // GetArticleLabel return all label with the same type by user_id with the article value
 func GetArticleLabel(ctx context.Context, exec boil.ContextExecutor, userID string, labelType string) ([]*ArticleLabel, error) {
 	data := []*ArticleLabel{}
-	err := models.NewQuery(
-		Select("labels.id as id", "headlines.id as headline_id",
-			"articles.headline as article_headline", "articles.content as article_content",
-			"labels.value as label_value",
-			"labels.updated_at as label_updated_at"),
-		From(fmt.Sprintf("%s_labels", labelType)),
-		InnerJoin("headlines on labels.headline_id = headlines.id"),
-		Where("user_id=", userID),
-	).Bind(ctx, exec, &data)
+	err := queries.Raw(fmt.Sprintf(`
+		select	l.id as id, articles.id as "article.id", articles.headline as "article.headline",
+				articles.content as "article.content", l.value as label_value,
+				l.updated_at as label_updated_at
+		from %s_labels as l
+		inner join articles on l.article_id = articles.id
+		where l.user_id = $1	
+	`, labelType), userID).Bind(ctx, exec, &data)
 	if err != nil {
 		return nil, err
 	}
@@ -154,10 +153,8 @@ type Label struct {
 
 // ArticleLabel contains label_id, article_id, article_headline, article_content, label_value, label_updated_at
 type ArticleLabel struct {
-	ID              string    `boil:"id" json:"id"`
-	ArticleID       string    `boil:"article_id" json:"article_id"`
-	ArticleHeadline string    `boil:"article_headline" json:"article_headline"`
-	ArticleContent  string    `boil:"article_content" json:"article_content"`
-	LabelValue      string    `boil:"label_value" json:"label_value"`
-	LabelUpdatedAt  time.Time `boil:"label_updated_at" json:"label_updated_at"`
+	ID             string `boil:"id" json:"id"`
+	models.Article `boil:",bind" json:"article"`
+	LabelValue     string    `boil:"label_value" json:"label_value"`
+	LabelUpdatedAt time.Time `boil:"label_updated_at" json:"label_updated_at"`
 }

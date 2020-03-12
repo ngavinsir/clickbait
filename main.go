@@ -53,7 +53,7 @@ func main() {
 			})
 		})
 
-		router.Post("/clickbait/{labelType}", handlers.Clickbait(db))
+		router.Post("/labeling/{labelType}", handlers.Labeling(db))
 	})
 
 	name, _ := os.Executable()

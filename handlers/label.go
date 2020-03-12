@@ -67,8 +67,8 @@ func GetAllLabel(db *sql.DB) http.HandlerFunc {
 	})
 }
 
-// Clickbait handler return new headline after labeled previous headline
-func Clickbait(db *sql.DB) http.HandlerFunc {
+// Labeling handler return new headline after labeled previous headline
+func Labeling(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
 		labelType := chi.URLParam(r, "labelType")

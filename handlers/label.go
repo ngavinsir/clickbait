@@ -15,6 +15,7 @@ import (
 func AddLabel(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
+		labelType := chi.URLParam(r, "labelType")
 
 		data := &LabelRequest{}
 		if err := render.Bind(r, data); err != nil {
@@ -22,7 +23,7 @@ func AddLabel(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		label, err := model.InsertLabel(r.Context(), db, userID, data.HeadlineID, data.Value)
+		label, err := model.InsertLabel(r.Context(), db, userID, data.ArticleID, data.Value, labelType)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
@@ -35,14 +36,16 @@ func AddLabel(db *sql.DB) http.HandlerFunc {
 // DeleteLabel handler
 func DeleteLabel(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if labelID := chi.URLParam(r, "labelID"); labelID != "" {
-			err := model.DeleteLabel(r.Context(), db, labelID)
-			if err != nil {
-				render.Render(w, r, ErrRender(err))
-				return
-			}
-		} else {
+		labelID := chi.URLParam(r, "labelID")
+		labelType := chi.URLParam(r, "labelType")
+		if labelID == "" {
 			render.Render(w, r, ErrRender(errors.New(ErrMissingReqFields)))
+		}
+
+		err := model.DeleteLabel(r.Context(), db, labelID, labelType)
+		if err != nil {
+			render.Render(w, r, ErrRender(err))
+			return
 		}
 	})
 }
@@ -51,9 +54,10 @@ func DeleteLabel(db *sql.DB) http.HandlerFunc {
 func GetAllLabel(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
+		labelType := chi.URLParam(r, "labelType")
 
-		labels := []*model.HeadlineLabel{}
-		labels, err := model.GetHeadlineLabel(r.Context(), db, userID)
+		labels := []*model.ArticleLabel{}
+		labels, err := model.GetArticleLabel(r.Context(), db, userID, labelType)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
@@ -67,6 +71,7 @@ func GetAllLabel(db *sql.DB) http.HandlerFunc {
 func Clickbait(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(UserIDCtxKey).(string)
+		labelType := chi.URLParam(r, "labelType")
 
 		data := &LabelRequest{}
 		if err := render.Bind(r, data); err != nil {
@@ -75,15 +80,15 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 		}
 
 		response := &ClickbaitResponse{}
-		label, err := model.InsertLabel(r.Context(), db, userID, data.HeadlineID, data.Value)
+		label, err := model.InsertLabel(r.Context(), db, userID, data.ArticleID, data.Value, labelType)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
 		}
 		response.LabelID = label.ID
 
-		headline, _ := model.GetRandomHeadline(r.Context(), db, userID)
-		response.Headline = headline
+		article, _ := model.GetRandomArticle(r.Context(), db, userID, labelType)
+		response.Article = article
 
 		render.JSON(w, r, response)
 	})
@@ -91,12 +96,12 @@ func Clickbait(db *sql.DB) http.HandlerFunc {
 
 // LabelRequest for add label handler request
 type LabelRequest struct {
-	*models.Label
+	*model.Label
 }
 
 // Bind label request if value and headline_id are present
 func (req *LabelRequest) Bind(r *http.Request) error {
-	if req.Label == nil || req.Value == "" || req.HeadlineID == "" {
+	if req.Label == nil || req.Value == "" || req.ArticleID == "" {
 		return errors.New(ErrMissingReqFields)
 	}
 
@@ -105,6 +110,6 @@ func (req *LabelRequest) Bind(r *http.Request) error {
 
 // ClickbaitResponse contains label_id and new_headline
 type ClickbaitResponse struct {
-	LabelID          string `boil:"label_id" json:"label_id"`
-	*models.Headline `boil:"new_headline" json:"new_headline"`
+	LabelID         string `boil:"label_id" json:"label_id"`
+	*models.Article `boil:"new_article" json:"new_article"`
 }

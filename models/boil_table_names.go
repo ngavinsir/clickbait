@@ -4,11 +4,13 @@
 package models
 
 var TableNames = struct {
-	Headlines string
-	Labels    string
-	Users     string
+	Articles        string
+	ClickbaitLabels string
+	SummaryLabels   string
+	Users           string
 }{
-	Headlines: "headlines",
-	Labels:    "labels",
-	Users:     "users",
+	Articles:        "articles",
+	ClickbaitLabels: "clickbait_labels",
+	SummaryLabels:   "summary_labels",
+	Users:           "users",
 }

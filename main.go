@@ -40,12 +40,12 @@ func main() {
 	router.Group(func(router chi.Router) {
 		router.Use(handlers.AuthMiddleware)
 
-		router.Route("/headline", func(router chi.Router) {
-			router.Post("/", handlers.AddHeadline(db))
-			router.Get("/random", handlers.RandomHeadline(db))
+		router.Route("/article", func(router chi.Router) {
+			router.Post("/", handlers.AddArticle(db))
+			router.Get("/random/{labelType}", handlers.RandomArticle(db))
 		})
 
-		router.Route("/label", func(router chi.Router) {
+		router.Route("/label/{labelType}", func(router chi.Router) {
 			router.Get("/", handlers.GetAllLabel(db))
 			router.Post("/", handlers.AddLabel(db))
 			router.Route("/{labelID}", func(router chi.Router) {
@@ -53,7 +53,7 @@ func main() {
 			})
 		})
 
-		router.Post("/clickbait", handlers.Clickbait(db))
+		router.Post("/clickbait/{labelType}", handlers.Clickbait(db))
 	})
 
 	name, _ := os.Executable()
@@ -80,8 +80,8 @@ func inputDataset(datasetPath string, exec boil.ContextExecutor) {
 	i := 0
 	for row := range processCSV(csvfile) {
 		i++
-		log.Printf("%d\n", i)
-		model.InsertHeadline(context.Background(), exec, row[2])
+		log.Printf("%s\n", row[2])
+		model.InsertArticle(context.Background(), exec, row[2], row[0])
 	}
 }
 

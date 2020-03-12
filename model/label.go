@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sort"
 	"time"
 
@@ -14,50 +15,96 @@ import (
 
 // InsertLabel with maximum of 3 labels per headline
 func InsertLabel(ctx context.Context, exec boil.ContextExecutor,
-	userID string, headlineID string, value string) (*models.Label, error) {
-	headlineLabelCount, err := GetHeadlineLabelCount(ctx, exec, headlineID)
+	userID string, articleID string, value string, labelType string) (*Label, error) {
+	articleLabelCount, err := GetArticleLabelCount(ctx, exec, articleID, labelType)
 	if err != nil {
 		return nil, err
 	}
 
-	if headlineLabelCount >= 3 {
+	if articleLabelCount >= 3 {
 		return nil, errors.New("maximum label reached")
 	}
 
-	label := &models.Label{
-		ID:         ksuid.New().String(),
-		UserID:     userID,
-		HeadlineID: headlineID,
-		Value:      value,
+	label := &Label{
+		ID:        ksuid.New().String(),
+		UserID:    userID,
+		ArticleID: articleID,
+		Value:     value,
 	}
 
-	if err := label.Insert(ctx, exec, boil.Infer()); err != nil {
+	if err := insertRawLabel(ctx, exec, label, labelType); err != nil {
 		return nil, err
 	}
 
 	return label, nil
 }
 
-// DeleteLabel helper
-func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string) error {
-	_, err := models.Labels(models.LabelWhere.ID.EQ(labelID)).DeleteAll(ctx, exec)
-	if err != nil {
-		return err
-	}
+func insertRawLabel(ctx context.Context, exec boil.ContextExecutor, label *Label, labelType string) error {
+	if labelType == "clickbait" {
+		rawLabel := &models.ClickbaitLabel{
+			ID:        label.ID,
+			UserID:    label.UserID,
+			ArticleID: label.ArticleID,
+			Value:     label.Value,
+		}
+		if err := rawLabel.Insert(ctx, exec, boil.Infer()); err != nil {
+			return err
+		}
 
-	return nil
+		return nil
+	} else if labelType == "summary" {
+		rawLabel := &models.SummaryLabel{
+			ID:        label.ID,
+			UserID:    label.UserID,
+			ArticleID: label.ArticleID,
+			Value:     label.Value,
+		}
+		if err := rawLabel.Insert(ctx, exec, boil.Infer()); err != nil {
+			return err
+		}
+
+		return nil
+	} else {
+		return errors.New("invalid label type")
+	}
 }
 
-// GetHeadlineLabel return all label by user_id with the headline value
-func GetHeadlineLabel(ctx context.Context, exec boil.ContextExecutor, userID string) ([]*HeadlineLabel, error) {
-	data := []*HeadlineLabel{}
+// DeleteLabel helper
+func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string, labelType string) error {
+	if labelType == "clickbait" {
+		_, err := models.ClickbaitLabels(
+			models.ClickbaitLabelWhere.ID.EQ(labelID),
+		).DeleteAll(ctx, exec)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	} else if labelType == "summary" {
+		_, err := models.SummaryLabels(
+			models.SummaryLabelWhere.ID.EQ(labelID),
+		).DeleteAll(ctx, exec)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	} else {
+		return errors.New("invalid label type")
+	}
+}
+
+// GetArticleLabel return all label with the same type by user_id with the article value
+func GetArticleLabel(ctx context.Context, exec boil.ContextExecutor, userID string, labelType string) ([]*ArticleLabel, error) {
+	data := []*ArticleLabel{}
 	err := models.NewQuery(
 		Select("labels.id as id", "headlines.id as headline_id",
-			"headlines.value as headline_value", "labels.value as label_value",
+			"articles.headline as article_headline", "articles.content as article_content",
+			"labels.value as label_value",
 			"labels.updated_at as label_updated_at"),
-		From("labels"),
+		From(fmt.Sprintf("%s_labels", labelType)),
 		InnerJoin("headlines on labels.headline_id = headlines.id"),
-		models.LabelWhere.UserID.EQ(userID),
+		Where("user_id=", userID),
 	).Bind(ctx, exec, &data)
 	if err != nil {
 		return nil, err
@@ -70,21 +117,47 @@ func GetHeadlineLabel(ctx context.Context, exec boil.ContextExecutor, userID str
 	return data, nil
 }
 
-// GetHeadlineLabelCount return label count by headline id
-func GetHeadlineLabelCount(ctx context.Context, exec boil.ContextExecutor, headlineID string) (int64, error) {
-	labelCount, err := models.Labels(models.LabelWhere.HeadlineID.EQ(headlineID)).Count(ctx, exec)
-	if err != nil {
-		return 0, err
-	}
+// GetArticleLabelCount return label count by headline id
+func GetArticleLabelCount(ctx context.Context, exec boil.ContextExecutor, articleID string, labelType string) (int64, error) {
+	if labelType == "clickbait" {
+		labelCount, err := models.ClickbaitLabels(
+			models.ClickbaitLabelWhere.ArticleID.EQ(articleID),
+		).Count(ctx, exec)
+		if err != nil {
+			return 0, err
+		}
 
-	return labelCount, nil
+		return labelCount, nil
+	} else if labelType == "summary" {
+		labelCount, err := models.SummaryLabels(
+			models.SummaryLabelWhere.ArticleID.EQ(articleID),
+		).Count(ctx, exec)
+		if err != nil {
+			return 0, err
+		}
+
+		return labelCount, nil
+	} else {
+		return 0, errors.New("invalid label type")
+	}
 }
 
-// HeadlineLabel contains label_id, headline_id, headline_value, label_value, label_updated_at
-type HeadlineLabel struct {
-	ID             string    `boil:"id" json:"id"`
-	HeadlineID     string    `boil:"headline_id" json:"headline_id"`
-	HeadlineValue  string    `boil:"headline_value" json:"headline_value"`
-	LabelValue     string    `boil:"label_value" json:"label_value"`
-	LabelUpdatedAt time.Time `boil:"label_updated_at" json:"label_updated_at"`
+// Label general struct
+type Label struct {
+	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID    string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	ArticleID string    `boil:"article_id" json:"article_id" toml:"article_id" yaml:"article_id"`
+	Value     string    `boil:"value" json:"value" toml:"value" yaml:"value"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+}
+
+// ArticleLabel contains label_id, article_id, article_headline, article_content, label_value, label_updated_at
+type ArticleLabel struct {
+	ID              string    `boil:"id" json:"id"`
+	ArticleID       string    `boil:"article_id" json:"article_id"`
+	ArticleHeadline string    `boil:"article_headline" json:"article_headline"`
+	ArticleContent  string    `boil:"article_content" json:"article_content"`
+	LabelValue      string    `boil:"label_value" json:"label_value"`
+	LabelUpdatedAt  time.Time `boil:"label_updated_at" json:"label_updated_at"`
 }

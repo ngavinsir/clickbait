@@ -9,7 +9,7 @@ import (
 	"github.com/segmentio/ksuid"
 )
 
-func TestInsertHeadline(t *testing.T) {
+func TestInsertArticle(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -17,12 +17,13 @@ func TestInsertHeadline(t *testing.T) {
 	defer db.Close()
 
 	testID := ksuid.New().String()
-	testValue := "test_headline_value"
-	mock.ExpectExec(`INSERT INTO "headlines"`).WithArgs(testID, testValue).WillReturnResult(sqlmock.NewResult(1, 1))
+	testHeadline := "test_article_value"
+	testContent := "test_article_content"
+	mock.ExpectExec(`INSERT INTO "articles"`).WithArgs(testID, testHeadline, testContent).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	_, err = insertHeadlineWithID(context.Background(), db, testID, testValue)
+	_, err = insertArticleWithID(context.Background(), db, testID, testHeadline, testContent)
 	if err != nil {
-		t.Fatalf("error was not expected while inserting new headline: %s", err)
+		t.Fatalf("error was not expected while inserting new article: %s", err)
 	}
 
 	if err = mock.ExpectationsWereMet(); err != nil {
@@ -30,7 +31,7 @@ func TestInsertHeadline(t *testing.T) {
 	}
 }
 
-func TestGetRandomHeadline(t *testing.T) {
+func TestGetRandomarticle(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -39,14 +40,14 @@ func TestGetRandomHeadline(t *testing.T) {
 
 	testUserID := "test_user_id"
 	ret := sqlmock.NewRows([]string{"id", "value"})
-	ret.AddRow(driver.Value(testUserID), driver.Value("test_headline_value_1"))
-	ret.AddRow(driver.Value(testUserID), driver.Value("test_headline_value_2"))
+	ret.AddRow(driver.Value(testUserID), driver.Value("test_article_value_1"))
+	ret.AddRow(driver.Value(testUserID), driver.Value("test_article_value_2"))
 
 	mock.ExpectQuery(`select h.id, h.value`).WithArgs(testUserID, 3).WillReturnRows(ret)
 
-	_, err = GetRandomHeadline(context.Background(), db, testUserID)
+	_, err = GetRandomArticle(context.Background(), db, testUserID, "")
 	if err != nil {
-		t.Fatalf("error was not expected while getting random headline: %s", err)
+		t.Fatalf("error was not expected while getting random article: %s", err)
 	}
 
 	if err = mock.ExpectationsWereMet(); err != nil {

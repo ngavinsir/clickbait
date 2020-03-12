@@ -97,14 +97,16 @@ func DeleteLabel(ctx context.Context, exec boil.ContextExecutor, labelID string,
 // GetArticleLabel return all label with the same type by user_id with the article value
 func GetArticleLabel(ctx context.Context, exec boil.ContextExecutor, userID string, labelType string) ([]*ArticleLabel, error) {
 	data := []*ArticleLabel{}
-	err := queries.Raw(fmt.Sprintf(`
-		select	l.id as id, articles.id as "article.id", articles.headline as "article.headline",
-				articles.content as "article.content", l.value as label_value,
-				l.updated_at as label_updated_at
-		from %s_labels as l
-		inner join articles on l.article_id = articles.id
-		where l.user_id = $1	
-	`, labelType), userID).Bind(ctx, exec, &data)
+	err := queries.Raw(
+		fmt.Sprintf(`
+			select	l.id as id, articles.id as "article.id", articles.headline as "article.headline",
+					articles.content as "article.content", l.value as label_value,
+					l.updated_at as label_updated_at
+			from %s_labels as l
+			inner join articles on l.article_id = articles.id
+			where l.user_id = $1	
+		`, labelType),
+		userID).Bind(ctx, exec, &data)
 	if err != nil {
 		return nil, err
 	}

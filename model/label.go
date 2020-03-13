@@ -16,6 +16,14 @@ import (
 // InsertLabel with maximum of 3 labels per headline
 func InsertLabel(ctx context.Context, exec boil.ContextExecutor,
 	userID string, articleID string, value string, labelType string) (*Label, error) {
+	isLabeled, err := isLabeledByUser(ctx, exec, articleID, userID, labelType)
+	if err != nil {
+		return nil, err
+	}
+	if isLabeled {
+		return nil, errors.New("can't label the same article")
+	}
+
 	articleLabelCount, err := GetArticleLabelCount(ctx, exec, articleID, labelType)
 	if err != nil {
 		return nil, err
@@ -66,6 +74,32 @@ func insertRawLabel(ctx context.Context, exec boil.ContextExecutor, label *Label
 		return nil
 	} else {
 		return errors.New("invalid label type")
+	}
+}
+
+func isLabeledByUser(ctx context.Context, exec boil.ContextExecutor, articleID string, userID string, labelType string) (bool, error) {
+	if labelType == "clickbait" {
+		isLabeled, err := models.ClickbaitLabels(
+			models.ClickbaitLabelWhere.ArticleID.EQ(articleID),
+			models.ClickbaitLabelWhere.UserID.EQ(userID),
+		).Exists(ctx, exec)
+		if err != nil {
+			return false, err
+		}
+
+		return isLabeled, nil
+	} else if labelType == "summary" {
+		isLabeled, err := models.SummaryLabels(
+			models.SummaryLabelWhere.ArticleID.EQ(articleID),
+			models.SummaryLabelWhere.UserID.EQ(userID),
+		).Exists(ctx, exec)
+		if err != nil {
+			return false, err
+		}
+
+		return isLabeled, nil
+	} else {
+		return false, errors.New("invalid label type")
 	}
 }
 

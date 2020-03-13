@@ -133,9 +133,9 @@ func GetArticleLabel(ctx context.Context, exec boil.ContextExecutor, userID stri
 	data := []*ArticleLabel{}
 	err := queries.Raw(
 		fmt.Sprintf(`
-			select	l.id as id, articles.id as "article.id", articles.headline as "article.headline",
-					articles.content as "article.content", l.value as label_value,
-					l.updated_at as label_updated_at
+			select	l.id as "label.id", articles.id as "article.id", articles.headline as "article.headline",
+					articles.content as "article.content", l.value as "label.value",
+					l.updated_at as "label.updated_at"
 			from %s_labels as l
 			inner join articles on l.article_id = articles.id
 			where l.user_id = $1	
@@ -146,7 +146,7 @@ func GetArticleLabel(ctx context.Context, exec boil.ContextExecutor, userID stri
 	}
 
 	sort.Slice(data, func(i, j int) bool {
-		return data[i].LabelUpdatedAt.After(data[j].LabelUpdatedAt)
+		return data[i].Label.UpdatedAt.After(data[j].Label.UpdatedAt)
 	})
 
 	return data, nil
@@ -180,17 +180,15 @@ func GetArticleLabelCount(ctx context.Context, exec boil.ContextExecutor, articl
 // Label general struct
 type Label struct {
 	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID    string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	ArticleID string    `boil:"article_id" json:"article_id" toml:"article_id" yaml:"article_id"`
+	UserID    string    `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id"`
+	ArticleID string    `boil:"article_id" json:"article_id,omitempty" toml:"article_id" yaml:"article_id"`
 	Value     string    `boil:"value" json:"value" toml:"value" yaml:"value"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 }
 
 // ArticleLabel contains label_id, article_id, article_headline, article_content, label_value, label_updated_at
 type ArticleLabel struct {
-	ID             string `boil:"id" json:"id"`
+	Label `boil:",bind" json:"label"`
 	models.Article `boil:",bind" json:"article"`
-	LabelValue     string    `boil:"label_value" json:"label_value"`
-	LabelUpdatedAt time.Time `boil:"label_updated_at" json:"label_updated_at"`
 }

@@ -189,6 +189,6 @@ type Label struct {
 
 // ArticleLabel contains label_id, article_id, article_headline, article_content, label_value, label_updated_at
 type ArticleLabel struct {
-	Label `boil:",bind" json:"label"`
+	Label          `boil:",bind" json:"label"`
 	models.Article `boil:",bind" json:"article"`
 }

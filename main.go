@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -24,6 +25,7 @@ func main() {
 
 	db, err := setupDB()
 	handleErr(err)
+	log.Println("connected to db")
 
 	//inputDataset("./dataset/cnn.csv", db)
 
@@ -57,8 +59,13 @@ func main() {
 	})
 
 	name, _ := os.Executable()
-	log.Printf("Server started on :4040, pid: %s", name)
-	log.Fatal(http.ListenAndServe(":4040", router))
+	port := ":4040"
+	if envPort := os.Getenv("PORT"); envPort != "" {
+		port = fmt.Sprintf(":%s", envPort)
+	}
+
+	log.Printf("Server started on %s, pid: %s", port, name)
+	log.Fatal(http.ListenAndServe(port, router))
 }
 
 func handleErr(err error) {
@@ -68,7 +75,12 @@ func handleErr(err error) {
 }
 
 func setupDB() (*sql.DB, error) {
-	return sql.Open("postgres", `dbname=clickbait host=localhost user=postgres password=postgres`)
+	conn := "dbname=clickbait host=localhost user=postgres password=postgres"
+	if envConn := os.Getenv("DATABASE_URL"); envConn != "" {
+		conn = envConn
+	}
+
+	return sql.Open("postgres", conn)
 }
 
 func inputDataset(datasetPath string, exec boil.ContextExecutor) {

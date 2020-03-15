@@ -41,21 +41,24 @@ func main() {
 
 	router.Group(func(router chi.Router) {
 		router.Use(handlers.AuthMiddleware)
-
-		router.Route("/article", func(router chi.Router) {
-			router.Post("/", handlers.AddArticle(db))
-			router.Get("/random/{labelType}", handlers.RandomArticle(db))
-		})
-
-		router.Route("/label/{labelType}", func(router chi.Router) {
-			router.Get("/", handlers.GetAllLabel(db))
-			router.Post("/", handlers.AddLabel(db))
-			router.Route("/{labelID}", func(router chi.Router) {
-				router.Delete("/", handlers.DeleteLabel(db))
+		
+		router.Route("/{labelType}", func(router chi.Router) {
+			router.Route("/article", func(router chi.Router) {
+				router.Get("/random", handlers.RandomArticle(db))
 			})
+	
+			router.Route("/label", func(router chi.Router) {
+				router.Get("/", handlers.GetAllLabel(db))
+				router.Post("/", handlers.AddLabel(db))
+				router.Route("/{labelID}", func(router chi.Router) {
+					router.Delete("/", handlers.DeleteLabel(db))
+				})
+			})
+	
+			router.Post("/labeling", handlers.Labeling(db))
 		})
-
-		router.Post("/labeling/{labelType}", handlers.Labeling(db))
+		
+		router.Post("/article", handlers.AddArticle(db))
 	})
 
 	name, _ := os.Executable()

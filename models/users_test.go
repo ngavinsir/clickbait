@@ -494,14 +494,14 @@ func testUsersInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testUserToManyClickbaitLabels(t *testing.T) {
+func testUserToManyLabels(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var a User
-	var b, c ClickbaitLabel
+	var b, c Label
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, userDBTypes, true, userColumnsWithDefault...); err != nil {
@@ -512,10 +512,10 @@ func testUserToManyClickbaitLabels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = randomize.Struct(seed, &b, clickbaitLabelDBTypes, false, clickbaitLabelColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &b, labelDBTypes, false, labelColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, clickbaitLabelDBTypes, false, clickbaitLabelColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &c, labelDBTypes, false, labelColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -529,7 +529,7 @@ func testUserToManyClickbaitLabels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.ClickbaitLabels().All(ctx, tx)
+	check, err := a.Labels().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -552,96 +552,18 @@ func testUserToManyClickbaitLabels(t *testing.T) {
 	}
 
 	slice := UserSlice{&a}
-	if err = a.L.LoadClickbaitLabels(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
+	if err = a.L.LoadLabels(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.ClickbaitLabels); got != 2 {
+	if got := len(a.R.Labels); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.ClickbaitLabels = nil
-	if err = a.L.LoadClickbaitLabels(ctx, tx, true, &a, nil); err != nil {
+	a.R.Labels = nil
+	if err = a.L.LoadLabels(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.ClickbaitLabels); got != 2 {
-		t.Error("number of eager loaded records wrong, got:", got)
-	}
-
-	if t.Failed() {
-		t.Logf("%#v", check)
-	}
-}
-
-func testUserToManySummaryLabels(t *testing.T) {
-	var err error
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a User
-	var b, c SummaryLabel
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, userDBTypes, true, userColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize User struct: %s", err)
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = randomize.Struct(seed, &b, summaryLabelDBTypes, false, summaryLabelColumnsWithDefault...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, summaryLabelDBTypes, false, summaryLabelColumnsWithDefault...); err != nil {
-		t.Fatal(err)
-	}
-
-	b.UserID = a.ID
-	c.UserID = a.ID
-
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := a.SummaryLabels().All(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	bFound, cFound := false, false
-	for _, v := range check {
-		if v.UserID == b.UserID {
-			bFound = true
-		}
-		if v.UserID == c.UserID {
-			cFound = true
-		}
-	}
-
-	if !bFound {
-		t.Error("expected to find b")
-	}
-	if !cFound {
-		t.Error("expected to find c")
-	}
-
-	slice := UserSlice{&a}
-	if err = a.L.LoadSummaryLabels(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if got := len(a.R.SummaryLabels); got != 2 {
-		t.Error("number of eager loaded records wrong, got:", got)
-	}
-
-	a.R.SummaryLabels = nil
-	if err = a.L.LoadSummaryLabels(ctx, tx, true, &a, nil); err != nil {
-		t.Fatal(err)
-	}
-	if got := len(a.R.SummaryLabels); got != 2 {
+	if got := len(a.R.Labels); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -650,7 +572,7 @@ func testUserToManySummaryLabels(t *testing.T) {
 	}
 }
 
-func testUserToManyAddOpClickbaitLabels(t *testing.T) {
+func testUserToManyAddOpLabels(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -658,15 +580,15 @@ func testUserToManyAddOpClickbaitLabels(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a User
-	var b, c, d, e ClickbaitLabel
+	var b, c, d, e Label
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*ClickbaitLabel{&b, &c, &d, &e}
+	foreigners := []*Label{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, clickbaitLabelDBTypes, false, strmangle.SetComplement(clickbaitLabelPrimaryKeyColumns, clickbaitLabelColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, labelDBTypes, false, strmangle.SetComplement(labelPrimaryKeyColumns, labelColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -681,13 +603,13 @@ func testUserToManyAddOpClickbaitLabels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*ClickbaitLabel{
+	foreignersSplitByInsertion := [][]*Label{
 		{&b, &c},
 		{&d, &e},
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddClickbaitLabels(ctx, tx, i != 0, x...)
+		err = a.AddLabels(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -709,89 +631,14 @@ func testUserToManyAddOpClickbaitLabels(t *testing.T) {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.ClickbaitLabels[i*2] != first {
+		if a.R.Labels[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.ClickbaitLabels[i*2+1] != second {
-			t.Error("relationship struct slice not set to correct value")
-		}
-
-		count, err := a.ClickbaitLabels().Count(ctx, tx)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if want := int64((i + 1) * 2); count != want {
-			t.Error("want", want, "got", count)
-		}
-	}
-}
-func testUserToManyAddOpSummaryLabels(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a User
-	var b, c, d, e SummaryLabel
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*SummaryLabel{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, summaryLabelDBTypes, false, strmangle.SetComplement(summaryLabelPrimaryKeyColumns, summaryLabelColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	foreignersSplitByInsertion := [][]*SummaryLabel{
-		{&b, &c},
-		{&d, &e},
-	}
-
-	for i, x := range foreignersSplitByInsertion {
-		err = a.AddSummaryLabels(ctx, tx, i != 0, x...)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		first := x[0]
-		second := x[1]
-
-		if a.ID != first.UserID {
-			t.Error("foreign key was wrong value", a.ID, first.UserID)
-		}
-		if a.ID != second.UserID {
-			t.Error("foreign key was wrong value", a.ID, second.UserID)
-		}
-
-		if first.R.User != &a {
-			t.Error("relationship was not added properly to the foreign slice")
-		}
-		if second.R.User != &a {
-			t.Error("relationship was not added properly to the foreign slice")
-		}
-
-		if a.R.SummaryLabels[i*2] != first {
-			t.Error("relationship struct slice not set to correct value")
-		}
-		if a.R.SummaryLabels[i*2+1] != second {
+		if a.R.Labels[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.SummaryLabels().Count(ctx, tx)
+		count, err := a.Labels().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}

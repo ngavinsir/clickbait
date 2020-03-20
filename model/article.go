@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/ngavinsir/clickbait/models"
 	"github.com/segmentio/ksuid"
@@ -43,21 +42,19 @@ func GetRandomArticle(ctx context.Context, exec boil.ContextExecutor, userID str
 	}
 
 	article := &models.Article{}
-	query := fmt.Sprintf(`
+	err := queries.Raw(`
 		select a.id, a.headline, a.content
-		from articles a left join %s_labels l on a.id = l.article_id
+		from articles a left join labels l on a.id = l.article_id and l.type = $1
 		where a.id not in (
 			select l.article_id
-			from %s_labels l
-			where l.user_id = $1
-			group by l.article_id
+			from labels l
+			where l.user_id = $2 and l.type = $1
 		)
 		group by a.id
-		having count(l.id) < $2
+		having count(l.id) < $3
 		order by random()
 		limit 1
-	`, labelType, labelType)
-	err := queries.Raw(query, userID, 3).Bind(ctx, exec, article)
+	`, labelType, userID, 3).Bind(ctx, exec, article)
 
 	if err != nil {
 		return nil, err

@@ -37,12 +37,11 @@ func AddLabel(db *sql.DB) http.HandlerFunc {
 func DeleteLabel(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		labelID := chi.URLParam(r, "labelID")
-		labelType := chi.URLParam(r, "labelType")
 		if labelID == "" {
 			render.Render(w, r, ErrRender(errors.New(ErrMissingReqFields)))
 		}
 
-		err := model.DeleteLabel(r.Context(), db, labelID, labelType)
+		err := model.DeleteLabel(r.Context(), db, labelID)
 		if err != nil {
 			render.Render(w, r, ErrRender(err))
 			return
@@ -96,7 +95,7 @@ func Labeling(db *sql.DB) http.HandlerFunc {
 
 // LabelRequest for add label handler request
 type LabelRequest struct {
-	*model.Label
+	*models.Label
 }
 
 // Bind label request if value and headline_id are present

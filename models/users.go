@@ -55,17 +55,14 @@ var UserWhere = struct {
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
-	ClickbaitLabels string
-	SummaryLabels   string
+	Labels string
 }{
-	ClickbaitLabels: "ClickbaitLabels",
-	SummaryLabels:   "SummaryLabels",
+	Labels: "Labels",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	ClickbaitLabels ClickbaitLabelSlice
-	SummaryLabels   SummaryLabelSlice
+	Labels LabelSlice
 }
 
 // NewStruct creates a new relationship struct
@@ -358,51 +355,30 @@ func (q userQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
-// ClickbaitLabels retrieves all the clickbait_label's ClickbaitLabels with an executor.
-func (o *User) ClickbaitLabels(mods ...qm.QueryMod) clickbaitLabelQuery {
+// Labels retrieves all the label's Labels with an executor.
+func (o *User) Labels(mods ...qm.QueryMod) labelQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"clickbait_labels\".\"user_id\"=?", o.ID),
+		qm.Where("\"labels\".\"user_id\"=?", o.ID),
 	)
 
-	query := ClickbaitLabels(queryMods...)
-	queries.SetFrom(query.Query, "\"clickbait_labels\"")
+	query := Labels(queryMods...)
+	queries.SetFrom(query.Query, "\"labels\"")
 
 	if len(queries.GetSelect(query.Query)) == 0 {
-		queries.SetSelect(query.Query, []string{"\"clickbait_labels\".*"})
+		queries.SetSelect(query.Query, []string{"\"labels\".*"})
 	}
 
 	return query
 }
 
-// SummaryLabels retrieves all the summary_label's SummaryLabels with an executor.
-func (o *User) SummaryLabels(mods ...qm.QueryMod) summaryLabelQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"summary_labels\".\"user_id\"=?", o.ID),
-	)
-
-	query := SummaryLabels(queryMods...)
-	queries.SetFrom(query.Query, "\"summary_labels\"")
-
-	if len(queries.GetSelect(query.Query)) == 0 {
-		queries.SetSelect(query.Query, []string{"\"summary_labels\".*"})
-	}
-
-	return query
-}
-
-// LoadClickbaitLabels allows an eager lookup of values, cached into the
+// LoadLabels allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (userL) LoadClickbaitLabels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+func (userL) LoadLabels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
 	var slice []*User
 	var object *User
 
@@ -439,29 +415,29 @@ func (userL) LoadClickbaitLabels(ctx context.Context, e boil.ContextExecutor, si
 		return nil
 	}
 
-	query := NewQuery(qm.From(`clickbait_labels`), qm.WhereIn(`clickbait_labels.user_id in ?`, args...))
+	query := NewQuery(qm.From(`labels`), qm.WhereIn(`labels.user_id in ?`, args...))
 	if mods != nil {
 		mods.Apply(query)
 	}
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load clickbait_labels")
+		return errors.Wrap(err, "failed to eager load labels")
 	}
 
-	var resultSlice []*ClickbaitLabel
+	var resultSlice []*Label
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice clickbait_labels")
+		return errors.Wrap(err, "failed to bind eager loaded slice labels")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on clickbait_labels")
+		return errors.Wrap(err, "failed to close results in eager load on labels")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for clickbait_labels")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for labels")
 	}
 
-	if len(clickbaitLabelAfterSelectHooks) != 0 {
+	if len(labelAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -469,10 +445,10 @@ func (userL) LoadClickbaitLabels(ctx context.Context, e boil.ContextExecutor, si
 		}
 	}
 	if singular {
-		object.R.ClickbaitLabels = resultSlice
+		object.R.Labels = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
-				foreign.R = &clickbaitLabelR{}
+				foreign.R = &labelR{}
 			}
 			foreign.R.User = object
 		}
@@ -482,9 +458,9 @@ func (userL) LoadClickbaitLabels(ctx context.Context, e boil.ContextExecutor, si
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
 			if local.ID == foreign.UserID {
-				local.R.ClickbaitLabels = append(local.R.ClickbaitLabels, foreign)
+				local.R.Labels = append(local.R.Labels, foreign)
 				if foreign.R == nil {
-					foreign.R = &clickbaitLabelR{}
+					foreign.R = &labelR{}
 				}
 				foreign.R.User = local
 				break
@@ -495,106 +471,11 @@ func (userL) LoadClickbaitLabels(ctx context.Context, e boil.ContextExecutor, si
 	return nil
 }
 
-// LoadSummaryLabels allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (userL) LoadSummaryLabels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
-	var slice []*User
-	var object *User
-
-	if singular {
-		object = maybeUser.(*User)
-	} else {
-		slice = *maybeUser.(*[]*User)
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &userR{}
-		}
-		args = append(args, object.ID)
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &userR{}
-			}
-
-			for _, a := range args {
-				if a == obj.ID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.ID)
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(qm.From(`summary_labels`), qm.WhereIn(`summary_labels.user_id in ?`, args...))
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load summary_labels")
-	}
-
-	var resultSlice []*SummaryLabel
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice summary_labels")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on summary_labels")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for summary_labels")
-	}
-
-	if len(summaryLabelAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.SummaryLabels = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &summaryLabelR{}
-			}
-			foreign.R.User = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.ID == foreign.UserID {
-				local.R.SummaryLabels = append(local.R.SummaryLabels, foreign)
-				if foreign.R == nil {
-					foreign.R = &summaryLabelR{}
-				}
-				foreign.R.User = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// AddClickbaitLabels adds the given related objects to the existing relationships
+// AddLabels adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
-// Appends related to o.R.ClickbaitLabels.
+// Appends related to o.R.Labels.
 // Sets related.R.User appropriately.
-func (o *User) AddClickbaitLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*ClickbaitLabel) error {
+func (o *User) AddLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Label) error {
 	var err error
 	for _, rel := range related {
 		if insert {
@@ -604,9 +485,9 @@ func (o *User) AddClickbaitLabels(ctx context.Context, exec boil.ContextExecutor
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"clickbait_labels\" SET %s WHERE %s",
+				"UPDATE \"labels\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
-				strmangle.WhereClause("\"", "\"", 2, clickbaitLabelPrimaryKeyColumns),
+				strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
 			)
 			values := []interface{}{o.ID, rel.ID}
 
@@ -625,68 +506,15 @@ func (o *User) AddClickbaitLabels(ctx context.Context, exec boil.ContextExecutor
 
 	if o.R == nil {
 		o.R = &userR{
-			ClickbaitLabels: related,
+			Labels: related,
 		}
 	} else {
-		o.R.ClickbaitLabels = append(o.R.ClickbaitLabels, related...)
+		o.R.Labels = append(o.R.Labels, related...)
 	}
 
 	for _, rel := range related {
 		if rel.R == nil {
-			rel.R = &clickbaitLabelR{
-				User: o,
-			}
-		} else {
-			rel.R.User = o
-		}
-	}
-	return nil
-}
-
-// AddSummaryLabels adds the given related objects to the existing relationships
-// of the user, optionally inserting them as new records.
-// Appends related to o.R.SummaryLabels.
-// Sets related.R.User appropriately.
-func (o *User) AddSummaryLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*SummaryLabel) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.UserID = o.ID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"summary_labels\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
-				strmangle.WhereClause("\"", "\"", 2, summaryLabelPrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.ID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.UserID = o.ID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &userR{
-			SummaryLabels: related,
-		}
-	} else {
-		o.R.SummaryLabels = append(o.R.SummaryLabels, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &summaryLabelR{
+			rel.R = &labelR{
 				User: o,
 			}
 		} else {

@@ -21,24 +21,24 @@ var (
 	_ = queries.Equal
 )
 
-func testClickbaitLabels(t *testing.T) {
+func testLabels(t *testing.T) {
 	t.Parallel()
 
-	query := ClickbaitLabels()
+	query := Labels()
 
 	if query.Query == nil {
 		t.Error("expected a query, got nothing")
 	}
 }
 
-func testClickbaitLabelsDelete(t *testing.T) {
+func testLabelsDelete(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -54,7 +54,7 @@ func testClickbaitLabelsDelete(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,14 +64,14 @@ func testClickbaitLabelsDelete(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsQueryDeleteAll(t *testing.T) {
+func testLabelsQueryDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -81,13 +81,13 @@ func testClickbaitLabelsQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := ClickbaitLabels().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := Labels().DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,14 +97,14 @@ func testClickbaitLabelsQueryDeleteAll(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsSliceDeleteAll(t *testing.T) {
+func testLabelsSliceDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -114,7 +114,7 @@ func testClickbaitLabelsSliceDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := ClickbaitLabelSlice{o}
+	slice := LabelSlice{o}
 
 	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
@@ -122,7 +122,7 @@ func testClickbaitLabelsSliceDeleteAll(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,14 +132,14 @@ func testClickbaitLabelsSliceDeleteAll(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsExists(t *testing.T) {
+func testLabelsExists(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -149,23 +149,23 @@ func testClickbaitLabelsExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := ClickbaitLabelExists(ctx, tx, o.ID)
+	e, err := LabelExists(ctx, tx, o.ID)
 	if err != nil {
-		t.Errorf("Unable to check if ClickbaitLabel exists: %s", err)
+		t.Errorf("Unable to check if Label exists: %s", err)
 	}
 	if !e {
-		t.Errorf("Expected ClickbaitLabelExists to return true, but got false.")
+		t.Errorf("Expected LabelExists to return true, but got false.")
 	}
 }
 
-func testClickbaitLabelsFind(t *testing.T) {
+func testLabelsFind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -175,24 +175,24 @@ func testClickbaitLabelsFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	clickbaitLabelFound, err := FindClickbaitLabel(ctx, tx, o.ID)
+	labelFound, err := FindLabel(ctx, tx, o.ID)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if clickbaitLabelFound == nil {
+	if labelFound == nil {
 		t.Error("want a record, got nil")
 	}
 }
 
-func testClickbaitLabelsBind(t *testing.T) {
+func testLabelsBind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -202,19 +202,19 @@ func testClickbaitLabelsBind(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = ClickbaitLabels().Bind(ctx, tx, o); err != nil {
+	if err = Labels().Bind(ctx, tx, o); err != nil {
 		t.Error(err)
 	}
 }
 
-func testClickbaitLabelsOne(t *testing.T) {
+func testLabelsOne(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -224,38 +224,38 @@ func testClickbaitLabelsOne(t *testing.T) {
 		t.Error(err)
 	}
 
-	if x, err := ClickbaitLabels().One(ctx, tx); err != nil {
+	if x, err := Labels().One(ctx, tx); err != nil {
 		t.Error(err)
 	} else if x == nil {
 		t.Error("expected to get a non nil record")
 	}
 }
 
-func testClickbaitLabelsAll(t *testing.T) {
+func testLabelsAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	clickbaitLabelOne := &ClickbaitLabel{}
-	clickbaitLabelTwo := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, clickbaitLabelOne, clickbaitLabelDBTypes, false, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	labelOne := &Label{}
+	labelTwo := &Label{}
+	if err = randomize.Struct(seed, labelOne, labelDBTypes, false, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
-	if err = randomize.Struct(seed, clickbaitLabelTwo, clickbaitLabelDBTypes, false, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	if err = randomize.Struct(seed, labelTwo, labelDBTypes, false, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = clickbaitLabelOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = labelOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = clickbaitLabelTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = labelTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	slice, err := ClickbaitLabels().All(ctx, tx)
+	slice, err := Labels().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -265,31 +265,31 @@ func testClickbaitLabelsAll(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsCount(t *testing.T) {
+func testLabelsCount(t *testing.T) {
 	t.Parallel()
 
 	var err error
 	seed := randomize.NewSeed()
-	clickbaitLabelOne := &ClickbaitLabel{}
-	clickbaitLabelTwo := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, clickbaitLabelOne, clickbaitLabelDBTypes, false, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	labelOne := &Label{}
+	labelTwo := &Label{}
+	if err = randomize.Struct(seed, labelOne, labelDBTypes, false, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
-	if err = randomize.Struct(seed, clickbaitLabelTwo, clickbaitLabelDBTypes, false, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	if err = randomize.Struct(seed, labelTwo, labelDBTypes, false, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = clickbaitLabelOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = labelOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = clickbaitLabelTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = labelTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -299,155 +299,155 @@ func testClickbaitLabelsCount(t *testing.T) {
 	}
 }
 
-func clickbaitLabelBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func clickbaitLabelAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func clickbaitLabelAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func clickbaitLabelBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func clickbaitLabelAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func clickbaitLabelBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func clickbaitLabelAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func clickbaitLabelBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func clickbaitLabelAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *ClickbaitLabel) error {
-	*o = ClickbaitLabel{}
+func labelAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Label) error {
+	*o = Label{}
 	return nil
 }
 
-func testClickbaitLabelsHooks(t *testing.T) {
+func testLabelsHooks(t *testing.T) {
 	t.Parallel()
 
 	var err error
 
 	ctx := context.Background()
-	empty := &ClickbaitLabel{}
-	o := &ClickbaitLabel{}
+	empty := &Label{}
+	o := &Label{}
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, false); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel object: %s", err)
+	if err = randomize.Struct(seed, o, labelDBTypes, false); err != nil {
+		t.Errorf("Unable to randomize Label object: %s", err)
 	}
 
-	AddClickbaitLabelHook(boil.BeforeInsertHook, clickbaitLabelBeforeInsertHook)
+	AddLabelHook(boil.BeforeInsertHook, labelBeforeInsertHook)
 	if err = o.doBeforeInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeInsertHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelBeforeInsertHooks = []ClickbaitLabelHook{}
+	labelBeforeInsertHooks = []LabelHook{}
 
-	AddClickbaitLabelHook(boil.AfterInsertHook, clickbaitLabelAfterInsertHook)
+	AddLabelHook(boil.AfterInsertHook, labelAfterInsertHook)
 	if err = o.doAfterInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterInsertHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelAfterInsertHooks = []ClickbaitLabelHook{}
+	labelAfterInsertHooks = []LabelHook{}
 
-	AddClickbaitLabelHook(boil.AfterSelectHook, clickbaitLabelAfterSelectHook)
+	AddLabelHook(boil.AfterSelectHook, labelAfterSelectHook)
 	if err = o.doAfterSelectHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterSelectHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterSelectHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelAfterSelectHooks = []ClickbaitLabelHook{}
+	labelAfterSelectHooks = []LabelHook{}
 
-	AddClickbaitLabelHook(boil.BeforeUpdateHook, clickbaitLabelBeforeUpdateHook)
+	AddLabelHook(boil.BeforeUpdateHook, labelBeforeUpdateHook)
 	if err = o.doBeforeUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpdateHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelBeforeUpdateHooks = []ClickbaitLabelHook{}
+	labelBeforeUpdateHooks = []LabelHook{}
 
-	AddClickbaitLabelHook(boil.AfterUpdateHook, clickbaitLabelAfterUpdateHook)
+	AddLabelHook(boil.AfterUpdateHook, labelAfterUpdateHook)
 	if err = o.doAfterUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpdateHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelAfterUpdateHooks = []ClickbaitLabelHook{}
+	labelAfterUpdateHooks = []LabelHook{}
 
-	AddClickbaitLabelHook(boil.BeforeDeleteHook, clickbaitLabelBeforeDeleteHook)
+	AddLabelHook(boil.BeforeDeleteHook, labelBeforeDeleteHook)
 	if err = o.doBeforeDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeDeleteHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelBeforeDeleteHooks = []ClickbaitLabelHook{}
+	labelBeforeDeleteHooks = []LabelHook{}
 
-	AddClickbaitLabelHook(boil.AfterDeleteHook, clickbaitLabelAfterDeleteHook)
+	AddLabelHook(boil.AfterDeleteHook, labelAfterDeleteHook)
 	if err = o.doAfterDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterDeleteHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelAfterDeleteHooks = []ClickbaitLabelHook{}
+	labelAfterDeleteHooks = []LabelHook{}
 
-	AddClickbaitLabelHook(boil.BeforeUpsertHook, clickbaitLabelBeforeUpsertHook)
+	AddLabelHook(boil.BeforeUpsertHook, labelBeforeUpsertHook)
 	if err = o.doBeforeUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpsertHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelBeforeUpsertHooks = []ClickbaitLabelHook{}
+	labelBeforeUpsertHooks = []LabelHook{}
 
-	AddClickbaitLabelHook(boil.AfterUpsertHook, clickbaitLabelAfterUpsertHook)
+	AddLabelHook(boil.AfterUpsertHook, labelAfterUpsertHook)
 	if err = o.doAfterUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpsertHook function to empty object, but got: %#v", o)
 	}
-	clickbaitLabelAfterUpsertHooks = []ClickbaitLabelHook{}
+	labelAfterUpsertHooks = []LabelHook{}
 }
 
-func testClickbaitLabelsInsert(t *testing.T) {
+func testLabelsInsert(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -457,7 +457,7 @@ func testClickbaitLabelsInsert(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -467,24 +467,24 @@ func testClickbaitLabelsInsert(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsInsertWhitelist(t *testing.T) {
+func testLabelsInsertWhitelist(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = o.Insert(ctx, tx, boil.Whitelist(clickbaitLabelColumnsWithoutDefault...)); err != nil {
+	if err = o.Insert(ctx, tx, boil.Whitelist(labelColumnsWithoutDefault...)); err != nil {
 		t.Error(err)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -494,17 +494,17 @@ func testClickbaitLabelsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelToOneArticleUsingArticle(t *testing.T) {
+func testLabelToOneArticleUsingArticle(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local ClickbaitLabel
+	var local Label
 	var foreign Article
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, clickbaitLabelDBTypes, false, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	if err := randomize.Struct(seed, &local, labelDBTypes, false, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, articleDBTypes, false, articleColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Article struct: %s", err)
@@ -528,8 +528,8 @@ func testClickbaitLabelToOneArticleUsingArticle(t *testing.T) {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
-	slice := ClickbaitLabelSlice{&local}
-	if err = local.L.LoadArticle(ctx, tx, false, (*[]*ClickbaitLabel)(&slice), nil); err != nil {
+	slice := LabelSlice{&local}
+	if err = local.L.LoadArticle(ctx, tx, false, (*[]*Label)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
 	if local.R.Article == nil {
@@ -545,17 +545,17 @@ func testClickbaitLabelToOneArticleUsingArticle(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelToOneUserUsingUser(t *testing.T) {
+func testLabelToOneUserUsingUser(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local ClickbaitLabel
+	var local Label
 	var foreign User
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, clickbaitLabelDBTypes, false, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	if err := randomize.Struct(seed, &local, labelDBTypes, false, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, userDBTypes, false, userColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize User struct: %s", err)
@@ -579,8 +579,8 @@ func testClickbaitLabelToOneUserUsingUser(t *testing.T) {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
-	slice := ClickbaitLabelSlice{&local}
-	if err = local.L.LoadUser(ctx, tx, false, (*[]*ClickbaitLabel)(&slice), nil); err != nil {
+	slice := LabelSlice{&local}
+	if err = local.L.LoadUser(ctx, tx, false, (*[]*Label)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
 	if local.R.User == nil {
@@ -596,18 +596,18 @@ func testClickbaitLabelToOneUserUsingUser(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelToOneSetOpArticleUsingArticle(t *testing.T) {
+func testLabelToOneSetOpArticleUsingArticle(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a ClickbaitLabel
+	var a Label
 	var b, c Article
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, clickbaitLabelDBTypes, false, strmangle.SetComplement(clickbaitLabelPrimaryKeyColumns, clickbaitLabelColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, labelDBTypes, false, strmangle.SetComplement(labelPrimaryKeyColumns, labelColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	if err = randomize.Struct(seed, &b, articleDBTypes, false, strmangle.SetComplement(articlePrimaryKeyColumns, articleColumnsWithoutDefault)...); err != nil {
@@ -634,7 +634,7 @@ func testClickbaitLabelToOneSetOpArticleUsingArticle(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.ClickbaitLabels[0] != &a {
+		if x.R.Labels[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
 		if a.ArticleID != x.ID {
@@ -653,18 +653,18 @@ func testClickbaitLabelToOneSetOpArticleUsingArticle(t *testing.T) {
 		}
 	}
 }
-func testClickbaitLabelToOneSetOpUserUsingUser(t *testing.T) {
+func testLabelToOneSetOpUserUsingUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a ClickbaitLabel
+	var a Label
 	var b, c User
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, clickbaitLabelDBTypes, false, strmangle.SetComplement(clickbaitLabelPrimaryKeyColumns, clickbaitLabelColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, labelDBTypes, false, strmangle.SetComplement(labelPrimaryKeyColumns, labelColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
@@ -691,7 +691,7 @@ func testClickbaitLabelToOneSetOpUserUsingUser(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.ClickbaitLabels[0] != &a {
+		if x.R.Labels[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
 		if a.UserID != x.ID {
@@ -711,14 +711,14 @@ func testClickbaitLabelToOneSetOpUserUsingUser(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsReload(t *testing.T) {
+func testLabelsReload(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -733,14 +733,14 @@ func testClickbaitLabelsReload(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsReloadAll(t *testing.T) {
+func testLabelsReloadAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -750,21 +750,21 @@ func testClickbaitLabelsReloadAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := ClickbaitLabelSlice{o}
+	slice := LabelSlice{o}
 
 	if err = slice.ReloadAll(ctx, tx); err != nil {
 		t.Error(err)
 	}
 }
 
-func testClickbaitLabelsSelect(t *testing.T) {
+func testLabelsSelect(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -774,7 +774,7 @@ func testClickbaitLabelsSelect(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice, err := ClickbaitLabels().All(ctx, tx)
+	slice, err := Labels().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -785,25 +785,25 @@ func testClickbaitLabelsSelect(t *testing.T) {
 }
 
 var (
-	clickbaitLabelDBTypes = map[string]string{`ID`: `character varying`, `UserID`: `character varying`, `ArticleID`: `character varying`, `Value`: `character varying`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`}
-	_                     = bytes.MinRead
+	labelDBTypes = map[string]string{`ID`: `character varying`, `UserID`: `character varying`, `ArticleID`: `character varying`, `Value`: `text`, `Type`: `character varying`, `UpdatedAt`: `timestamp with time zone`, `CreatedAt`: `timestamp with time zone`}
+	_            = bytes.MinRead
 )
 
-func testClickbaitLabelsUpdate(t *testing.T) {
+func testLabelsUpdate(t *testing.T) {
 	t.Parallel()
 
-	if 0 == len(clickbaitLabelPrimaryKeyColumns) {
+	if 0 == len(labelPrimaryKeyColumns) {
 		t.Skip("Skipping table with no primary key columns")
 	}
-	if len(clickbaitLabelAllColumns) == len(clickbaitLabelPrimaryKeyColumns) {
+	if len(labelAllColumns) == len(labelPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -813,7 +813,7 @@ func testClickbaitLabelsUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -822,8 +822,8 @@ func testClickbaitLabelsUpdate(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	if rowsAff, err := o.Update(ctx, tx, boil.Infer()); err != nil {
@@ -833,18 +833,18 @@ func testClickbaitLabelsUpdate(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsSliceUpdateAll(t *testing.T) {
+func testLabelsSliceUpdateAll(t *testing.T) {
 	t.Parallel()
 
-	if len(clickbaitLabelAllColumns) == len(clickbaitLabelPrimaryKeyColumns) {
+	if len(labelAllColumns) == len(labelPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &ClickbaitLabel{}
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := &Label{}
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -854,7 +854,7 @@ func testClickbaitLabelsSliceUpdateAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -863,18 +863,18 @@ func testClickbaitLabelsSliceUpdateAll(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, clickbaitLabelDBTypes, true, clickbaitLabelPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	if err = randomize.Struct(seed, o, labelDBTypes, true, labelPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	// Remove Primary keys and unique columns from what we plan to update
 	var fields []string
-	if strmangle.StringSliceMatch(clickbaitLabelAllColumns, clickbaitLabelPrimaryKeyColumns) {
-		fields = clickbaitLabelAllColumns
+	if strmangle.StringSliceMatch(labelAllColumns, labelPrimaryKeyColumns) {
+		fields = labelAllColumns
 	} else {
 		fields = strmangle.SetComplement(
-			clickbaitLabelAllColumns,
-			clickbaitLabelPrimaryKeyColumns,
+			labelAllColumns,
+			labelPrimaryKeyColumns,
 		)
 	}
 
@@ -892,7 +892,7 @@ func testClickbaitLabelsSliceUpdateAll(t *testing.T) {
 		}
 	}
 
-	slice := ClickbaitLabelSlice{o}
+	slice := LabelSlice{o}
 	if rowsAff, err := slice.UpdateAll(ctx, tx, updateMap); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
@@ -900,29 +900,29 @@ func testClickbaitLabelsSliceUpdateAll(t *testing.T) {
 	}
 }
 
-func testClickbaitLabelsUpsert(t *testing.T) {
+func testLabelsUpsert(t *testing.T) {
 	t.Parallel()
 
-	if len(clickbaitLabelAllColumns) == len(clickbaitLabelPrimaryKeyColumns) {
+	if len(labelAllColumns) == len(labelPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
 	// Attempt the INSERT side of an UPSERT
-	o := ClickbaitLabel{}
-	if err = randomize.Struct(seed, &o, clickbaitLabelDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	o := Label{}
+	if err = randomize.Struct(seed, &o, labelDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 	if err = o.Upsert(ctx, tx, false, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert ClickbaitLabel: %s", err)
+		t.Errorf("Unable to upsert Label: %s", err)
 	}
 
-	count, err := ClickbaitLabels().Count(ctx, tx)
+	count, err := Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -931,15 +931,15 @@ func testClickbaitLabelsUpsert(t *testing.T) {
 	}
 
 	// Attempt the UPDATE side of an UPSERT
-	if err = randomize.Struct(seed, &o, clickbaitLabelDBTypes, false, clickbaitLabelPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize ClickbaitLabel struct: %s", err)
+	if err = randomize.Struct(seed, &o, labelDBTypes, false, labelPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
 	}
 
 	if err = o.Upsert(ctx, tx, true, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert ClickbaitLabel: %s", err)
+		t.Errorf("Unable to upsert Label: %s", err)
 	}
 
-	count, err = ClickbaitLabels().Count(ctx, tx)
+	count, err = Labels().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}

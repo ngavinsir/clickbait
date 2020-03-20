@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -22,78 +21,81 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// SummaryLabel is an object representing the database table.
-type SummaryLabel struct {
+// Label is an object representing the database table.
+type Label struct {
 	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	UserID    string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	ArticleID string    `boil:"article_id" json:"article_id" toml:"article_id" yaml:"article_id"`
 	Value     string    `boil:"value" json:"value" toml:"value" yaml:"value"`
+	Type      string    `boil:"type" json:"type" toml:"type" yaml:"type"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
-	R *summaryLabelR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L summaryLabelL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *labelR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L labelL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var SummaryLabelColumns = struct {
+var LabelColumns = struct {
 	ID        string
 	UserID    string
 	ArticleID string
 	Value     string
-	CreatedAt string
+	Type      string
 	UpdatedAt string
+	CreatedAt string
 }{
 	ID:        "id",
 	UserID:    "user_id",
 	ArticleID: "article_id",
 	Value:     "value",
-	CreatedAt: "created_at",
+	Type:      "type",
 	UpdatedAt: "updated_at",
+	CreatedAt: "created_at",
 }
 
 // Generated where
 
-type whereHelpernull_Time struct{ field string }
+type whereHelpertime_Time struct{ field string }
 
-func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
 }
-func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
-func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-var SummaryLabelWhere = struct {
+var LabelWhere = struct {
 	ID        whereHelperstring
 	UserID    whereHelperstring
 	ArticleID whereHelperstring
 	Value     whereHelperstring
+	Type      whereHelperstring
+	UpdatedAt whereHelpertime_Time
 	CreatedAt whereHelpertime_Time
-	UpdatedAt whereHelpernull_Time
 }{
-	ID:        whereHelperstring{field: "\"summary_labels\".\"id\""},
-	UserID:    whereHelperstring{field: "\"summary_labels\".\"user_id\""},
-	ArticleID: whereHelperstring{field: "\"summary_labels\".\"article_id\""},
-	Value:     whereHelperstring{field: "\"summary_labels\".\"value\""},
-	CreatedAt: whereHelpertime_Time{field: "\"summary_labels\".\"created_at\""},
-	UpdatedAt: whereHelpernull_Time{field: "\"summary_labels\".\"updated_at\""},
+	ID:        whereHelperstring{field: "\"labels\".\"id\""},
+	UserID:    whereHelperstring{field: "\"labels\".\"user_id\""},
+	ArticleID: whereHelperstring{field: "\"labels\".\"article_id\""},
+	Value:     whereHelperstring{field: "\"labels\".\"value\""},
+	Type:      whereHelperstring{field: "\"labels\".\"type\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"labels\".\"updated_at\""},
+	CreatedAt: whereHelpertime_Time{field: "\"labels\".\"created_at\""},
 }
 
-// SummaryLabelRels is where relationship names are stored.
-var SummaryLabelRels = struct {
+// LabelRels is where relationship names are stored.
+var LabelRels = struct {
 	Article string
 	User    string
 }{
@@ -101,50 +103,50 @@ var SummaryLabelRels = struct {
 	User:    "User",
 }
 
-// summaryLabelR is where relationships are stored.
-type summaryLabelR struct {
+// labelR is where relationships are stored.
+type labelR struct {
 	Article *Article
 	User    *User
 }
 
 // NewStruct creates a new relationship struct
-func (*summaryLabelR) NewStruct() *summaryLabelR {
-	return &summaryLabelR{}
+func (*labelR) NewStruct() *labelR {
+	return &labelR{}
 }
 
-// summaryLabelL is where Load methods for each relationship are stored.
-type summaryLabelL struct{}
+// labelL is where Load methods for each relationship are stored.
+type labelL struct{}
 
 var (
-	summaryLabelAllColumns            = []string{"id", "user_id", "article_id", "value", "created_at", "updated_at"}
-	summaryLabelColumnsWithoutDefault = []string{"id", "user_id", "article_id", "value", "created_at", "updated_at"}
-	summaryLabelColumnsWithDefault    = []string{}
-	summaryLabelPrimaryKeyColumns     = []string{"id"}
+	labelAllColumns            = []string{"id", "user_id", "article_id", "value", "type", "updated_at", "created_at"}
+	labelColumnsWithoutDefault = []string{"id", "user_id", "article_id", "value", "type", "updated_at", "created_at"}
+	labelColumnsWithDefault    = []string{}
+	labelPrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// SummaryLabelSlice is an alias for a slice of pointers to SummaryLabel.
-	// This should generally be used opposed to []SummaryLabel.
-	SummaryLabelSlice []*SummaryLabel
-	// SummaryLabelHook is the signature for custom SummaryLabel hook methods
-	SummaryLabelHook func(context.Context, boil.ContextExecutor, *SummaryLabel) error
+	// LabelSlice is an alias for a slice of pointers to Label.
+	// This should generally be used opposed to []Label.
+	LabelSlice []*Label
+	// LabelHook is the signature for custom Label hook methods
+	LabelHook func(context.Context, boil.ContextExecutor, *Label) error
 
-	summaryLabelQuery struct {
+	labelQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	summaryLabelType                 = reflect.TypeOf(&SummaryLabel{})
-	summaryLabelMapping              = queries.MakeStructMapping(summaryLabelType)
-	summaryLabelPrimaryKeyMapping, _ = queries.BindMapping(summaryLabelType, summaryLabelMapping, summaryLabelPrimaryKeyColumns)
-	summaryLabelInsertCacheMut       sync.RWMutex
-	summaryLabelInsertCache          = make(map[string]insertCache)
-	summaryLabelUpdateCacheMut       sync.RWMutex
-	summaryLabelUpdateCache          = make(map[string]updateCache)
-	summaryLabelUpsertCacheMut       sync.RWMutex
-	summaryLabelUpsertCache          = make(map[string]insertCache)
+	labelType                 = reflect.TypeOf(&Label{})
+	labelMapping              = queries.MakeStructMapping(labelType)
+	labelPrimaryKeyMapping, _ = queries.BindMapping(labelType, labelMapping, labelPrimaryKeyColumns)
+	labelInsertCacheMut       sync.RWMutex
+	labelInsertCache          = make(map[string]insertCache)
+	labelUpdateCacheMut       sync.RWMutex
+	labelUpdateCache          = make(map[string]updateCache)
+	labelUpsertCacheMut       sync.RWMutex
+	labelUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -155,24 +157,24 @@ var (
 	_ = qmhelper.Where
 )
 
-var summaryLabelBeforeInsertHooks []SummaryLabelHook
-var summaryLabelBeforeUpdateHooks []SummaryLabelHook
-var summaryLabelBeforeDeleteHooks []SummaryLabelHook
-var summaryLabelBeforeUpsertHooks []SummaryLabelHook
+var labelBeforeInsertHooks []LabelHook
+var labelBeforeUpdateHooks []LabelHook
+var labelBeforeDeleteHooks []LabelHook
+var labelBeforeUpsertHooks []LabelHook
 
-var summaryLabelAfterInsertHooks []SummaryLabelHook
-var summaryLabelAfterSelectHooks []SummaryLabelHook
-var summaryLabelAfterUpdateHooks []SummaryLabelHook
-var summaryLabelAfterDeleteHooks []SummaryLabelHook
-var summaryLabelAfterUpsertHooks []SummaryLabelHook
+var labelAfterInsertHooks []LabelHook
+var labelAfterSelectHooks []LabelHook
+var labelAfterUpdateHooks []LabelHook
+var labelAfterDeleteHooks []LabelHook
+var labelAfterUpsertHooks []LabelHook
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *SummaryLabel) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelBeforeInsertHooks {
+	for _, hook := range labelBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -182,12 +184,12 @@ func (o *SummaryLabel) doBeforeInsertHooks(ctx context.Context, exec boil.Contex
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *SummaryLabel) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelBeforeUpdateHooks {
+	for _, hook := range labelBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -197,12 +199,12 @@ func (o *SummaryLabel) doBeforeUpdateHooks(ctx context.Context, exec boil.Contex
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *SummaryLabel) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelBeforeDeleteHooks {
+	for _, hook := range labelBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -212,12 +214,12 @@ func (o *SummaryLabel) doBeforeDeleteHooks(ctx context.Context, exec boil.Contex
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *SummaryLabel) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelBeforeUpsertHooks {
+	for _, hook := range labelBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -227,12 +229,12 @@ func (o *SummaryLabel) doBeforeUpsertHooks(ctx context.Context, exec boil.Contex
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *SummaryLabel) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelAfterInsertHooks {
+	for _, hook := range labelAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -242,12 +244,12 @@ func (o *SummaryLabel) doAfterInsertHooks(ctx context.Context, exec boil.Context
 }
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *SummaryLabel) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelAfterSelectHooks {
+	for _, hook := range labelAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -257,12 +259,12 @@ func (o *SummaryLabel) doAfterSelectHooks(ctx context.Context, exec boil.Context
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *SummaryLabel) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelAfterUpdateHooks {
+	for _, hook := range labelAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -272,12 +274,12 @@ func (o *SummaryLabel) doAfterUpdateHooks(ctx context.Context, exec boil.Context
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *SummaryLabel) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelAfterDeleteHooks {
+	for _, hook := range labelAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -287,12 +289,12 @@ func (o *SummaryLabel) doAfterDeleteHooks(ctx context.Context, exec boil.Context
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *SummaryLabel) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Label) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range summaryLabelAfterUpsertHooks {
+	for _, hook := range labelAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -301,33 +303,33 @@ func (o *SummaryLabel) doAfterUpsertHooks(ctx context.Context, exec boil.Context
 	return nil
 }
 
-// AddSummaryLabelHook registers your hook function for all future operations.
-func AddSummaryLabelHook(hookPoint boil.HookPoint, summaryLabelHook SummaryLabelHook) {
+// AddLabelHook registers your hook function for all future operations.
+func AddLabelHook(hookPoint boil.HookPoint, labelHook LabelHook) {
 	switch hookPoint {
 	case boil.BeforeInsertHook:
-		summaryLabelBeforeInsertHooks = append(summaryLabelBeforeInsertHooks, summaryLabelHook)
+		labelBeforeInsertHooks = append(labelBeforeInsertHooks, labelHook)
 	case boil.BeforeUpdateHook:
-		summaryLabelBeforeUpdateHooks = append(summaryLabelBeforeUpdateHooks, summaryLabelHook)
+		labelBeforeUpdateHooks = append(labelBeforeUpdateHooks, labelHook)
 	case boil.BeforeDeleteHook:
-		summaryLabelBeforeDeleteHooks = append(summaryLabelBeforeDeleteHooks, summaryLabelHook)
+		labelBeforeDeleteHooks = append(labelBeforeDeleteHooks, labelHook)
 	case boil.BeforeUpsertHook:
-		summaryLabelBeforeUpsertHooks = append(summaryLabelBeforeUpsertHooks, summaryLabelHook)
+		labelBeforeUpsertHooks = append(labelBeforeUpsertHooks, labelHook)
 	case boil.AfterInsertHook:
-		summaryLabelAfterInsertHooks = append(summaryLabelAfterInsertHooks, summaryLabelHook)
+		labelAfterInsertHooks = append(labelAfterInsertHooks, labelHook)
 	case boil.AfterSelectHook:
-		summaryLabelAfterSelectHooks = append(summaryLabelAfterSelectHooks, summaryLabelHook)
+		labelAfterSelectHooks = append(labelAfterSelectHooks, labelHook)
 	case boil.AfterUpdateHook:
-		summaryLabelAfterUpdateHooks = append(summaryLabelAfterUpdateHooks, summaryLabelHook)
+		labelAfterUpdateHooks = append(labelAfterUpdateHooks, labelHook)
 	case boil.AfterDeleteHook:
-		summaryLabelAfterDeleteHooks = append(summaryLabelAfterDeleteHooks, summaryLabelHook)
+		labelAfterDeleteHooks = append(labelAfterDeleteHooks, labelHook)
 	case boil.AfterUpsertHook:
-		summaryLabelAfterUpsertHooks = append(summaryLabelAfterUpsertHooks, summaryLabelHook)
+		labelAfterUpsertHooks = append(labelAfterUpsertHooks, labelHook)
 	}
 }
 
-// One returns a single summaryLabel record from the query.
-func (q summaryLabelQuery) One(ctx context.Context, exec boil.ContextExecutor) (*SummaryLabel, error) {
-	o := &SummaryLabel{}
+// One returns a single label record from the query.
+func (q labelQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Label, error) {
+	o := &Label{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -336,7 +338,7 @@ func (q summaryLabelQuery) One(ctx context.Context, exec boil.ContextExecutor) (
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for summary_labels")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for labels")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -346,16 +348,16 @@ func (q summaryLabelQuery) One(ctx context.Context, exec boil.ContextExecutor) (
 	return o, nil
 }
 
-// All returns all SummaryLabel records from the query.
-func (q summaryLabelQuery) All(ctx context.Context, exec boil.ContextExecutor) (SummaryLabelSlice, error) {
-	var o []*SummaryLabel
+// All returns all Label records from the query.
+func (q labelQuery) All(ctx context.Context, exec boil.ContextExecutor) (LabelSlice, error) {
+	var o []*Label
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to SummaryLabel slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to Label slice")
 	}
 
-	if len(summaryLabelAfterSelectHooks) != 0 {
+	if len(labelAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -366,8 +368,8 @@ func (q summaryLabelQuery) All(ctx context.Context, exec boil.ContextExecutor) (
 	return o, nil
 }
 
-// Count returns the count of all SummaryLabel records in the query.
-func (q summaryLabelQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all Label records in the query.
+func (q labelQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -375,14 +377,14 @@ func (q summaryLabelQuery) Count(ctx context.Context, exec boil.ContextExecutor)
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count summary_labels rows")
+		return 0, errors.Wrap(err, "models: failed to count labels rows")
 	}
 
 	return count, nil
 }
 
 // Exists checks if the row exists in the table.
-func (q summaryLabelQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q labelQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -391,14 +393,14 @@ func (q summaryLabelQuery) Exists(ctx context.Context, exec boil.ContextExecutor
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if summary_labels exists")
+		return false, errors.Wrap(err, "models: failed to check if labels exists")
 	}
 
 	return count > 0, nil
 }
 
 // Article pointed to by the foreign key.
-func (o *SummaryLabel) Article(mods ...qm.QueryMod) articleQuery {
+func (o *Label) Article(mods ...qm.QueryMod) articleQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.ArticleID),
 	}
@@ -412,7 +414,7 @@ func (o *SummaryLabel) Article(mods ...qm.QueryMod) articleQuery {
 }
 
 // User pointed to by the foreign key.
-func (o *SummaryLabel) User(mods ...qm.QueryMod) userQuery {
+func (o *Label) User(mods ...qm.QueryMod) userQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.UserID),
 	}
@@ -427,20 +429,20 @@ func (o *SummaryLabel) User(mods ...qm.QueryMod) userQuery {
 
 // LoadArticle allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (summaryLabelL) LoadArticle(ctx context.Context, e boil.ContextExecutor, singular bool, maybeSummaryLabel interface{}, mods queries.Applicator) error {
-	var slice []*SummaryLabel
-	var object *SummaryLabel
+func (labelL) LoadArticle(ctx context.Context, e boil.ContextExecutor, singular bool, maybeLabel interface{}, mods queries.Applicator) error {
+	var slice []*Label
+	var object *Label
 
 	if singular {
-		object = maybeSummaryLabel.(*SummaryLabel)
+		object = maybeLabel.(*Label)
 	} else {
-		slice = *maybeSummaryLabel.(*[]*SummaryLabel)
+		slice = *maybeLabel.(*[]*Label)
 	}
 
 	args := make([]interface{}, 0, 1)
 	if singular {
 		if object.R == nil {
-			object.R = &summaryLabelR{}
+			object.R = &labelR{}
 		}
 		args = append(args, object.ArticleID)
 
@@ -448,7 +450,7 @@ func (summaryLabelL) LoadArticle(ctx context.Context, e boil.ContextExecutor, si
 	Outer:
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &summaryLabelR{}
+				obj.R = &labelR{}
 			}
 
 			for _, a := range args {
@@ -488,7 +490,7 @@ func (summaryLabelL) LoadArticle(ctx context.Context, e boil.ContextExecutor, si
 		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for articles")
 	}
 
-	if len(summaryLabelAfterSelectHooks) != 0 {
+	if len(labelAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -506,7 +508,7 @@ func (summaryLabelL) LoadArticle(ctx context.Context, e boil.ContextExecutor, si
 		if foreign.R == nil {
 			foreign.R = &articleR{}
 		}
-		foreign.R.SummaryLabels = append(foreign.R.SummaryLabels, object)
+		foreign.R.Labels = append(foreign.R.Labels, object)
 		return nil
 	}
 
@@ -517,7 +519,7 @@ func (summaryLabelL) LoadArticle(ctx context.Context, e boil.ContextExecutor, si
 				if foreign.R == nil {
 					foreign.R = &articleR{}
 				}
-				foreign.R.SummaryLabels = append(foreign.R.SummaryLabels, local)
+				foreign.R.Labels = append(foreign.R.Labels, local)
 				break
 			}
 		}
@@ -528,20 +530,20 @@ func (summaryLabelL) LoadArticle(ctx context.Context, e boil.ContextExecutor, si
 
 // LoadUser allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (summaryLabelL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeSummaryLabel interface{}, mods queries.Applicator) error {
-	var slice []*SummaryLabel
-	var object *SummaryLabel
+func (labelL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeLabel interface{}, mods queries.Applicator) error {
+	var slice []*Label
+	var object *Label
 
 	if singular {
-		object = maybeSummaryLabel.(*SummaryLabel)
+		object = maybeLabel.(*Label)
 	} else {
-		slice = *maybeSummaryLabel.(*[]*SummaryLabel)
+		slice = *maybeLabel.(*[]*Label)
 	}
 
 	args := make([]interface{}, 0, 1)
 	if singular {
 		if object.R == nil {
-			object.R = &summaryLabelR{}
+			object.R = &labelR{}
 		}
 		args = append(args, object.UserID)
 
@@ -549,7 +551,7 @@ func (summaryLabelL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 	Outer:
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &summaryLabelR{}
+				obj.R = &labelR{}
 			}
 
 			for _, a := range args {
@@ -589,7 +591,7 @@ func (summaryLabelL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
 	}
 
-	if len(summaryLabelAfterSelectHooks) != 0 {
+	if len(labelAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -607,7 +609,7 @@ func (summaryLabelL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 		if foreign.R == nil {
 			foreign.R = &userR{}
 		}
-		foreign.R.SummaryLabels = append(foreign.R.SummaryLabels, object)
+		foreign.R.Labels = append(foreign.R.Labels, object)
 		return nil
 	}
 
@@ -618,7 +620,7 @@ func (summaryLabelL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 				if foreign.R == nil {
 					foreign.R = &userR{}
 				}
-				foreign.R.SummaryLabels = append(foreign.R.SummaryLabels, local)
+				foreign.R.Labels = append(foreign.R.Labels, local)
 				break
 			}
 		}
@@ -627,10 +629,10 @@ func (summaryLabelL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 	return nil
 }
 
-// SetArticle of the summaryLabel to the related item.
+// SetArticle of the label to the related item.
 // Sets o.R.Article to related.
-// Adds o to related.R.SummaryLabels.
-func (o *SummaryLabel) SetArticle(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Article) error {
+// Adds o to related.R.Labels.
+func (o *Label) SetArticle(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Article) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -639,9 +641,9 @@ func (o *SummaryLabel) SetArticle(ctx context.Context, exec boil.ContextExecutor
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"summary_labels\" SET %s WHERE %s",
+		"UPDATE \"labels\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"article_id"}),
-		strmangle.WhereClause("\"", "\"", 2, summaryLabelPrimaryKeyColumns),
+		strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.ID}
 
@@ -656,7 +658,7 @@ func (o *SummaryLabel) SetArticle(ctx context.Context, exec boil.ContextExecutor
 
 	o.ArticleID = related.ID
 	if o.R == nil {
-		o.R = &summaryLabelR{
+		o.R = &labelR{
 			Article: related,
 		}
 	} else {
@@ -665,19 +667,19 @@ func (o *SummaryLabel) SetArticle(ctx context.Context, exec boil.ContextExecutor
 
 	if related.R == nil {
 		related.R = &articleR{
-			SummaryLabels: SummaryLabelSlice{o},
+			Labels: LabelSlice{o},
 		}
 	} else {
-		related.R.SummaryLabels = append(related.R.SummaryLabels, o)
+		related.R.Labels = append(related.R.Labels, o)
 	}
 
 	return nil
 }
 
-// SetUser of the summaryLabel to the related item.
+// SetUser of the label to the related item.
 // Sets o.R.User to related.
-// Adds o to related.R.SummaryLabels.
-func (o *SummaryLabel) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+// Adds o to related.R.Labels.
+func (o *Label) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -686,9 +688,9 @@ func (o *SummaryLabel) SetUser(ctx context.Context, exec boil.ContextExecutor, i
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"summary_labels\" SET %s WHERE %s",
+		"UPDATE \"labels\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
-		strmangle.WhereClause("\"", "\"", 2, summaryLabelPrimaryKeyColumns),
+		strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.ID}
 
@@ -703,7 +705,7 @@ func (o *SummaryLabel) SetUser(ctx context.Context, exec boil.ContextExecutor, i
 
 	o.UserID = related.ID
 	if o.R == nil {
-		o.R = &summaryLabelR{
+		o.R = &labelR{
 			User: related,
 		}
 	} else {
@@ -712,63 +714,63 @@ func (o *SummaryLabel) SetUser(ctx context.Context, exec boil.ContextExecutor, i
 
 	if related.R == nil {
 		related.R = &userR{
-			SummaryLabels: SummaryLabelSlice{o},
+			Labels: LabelSlice{o},
 		}
 	} else {
-		related.R.SummaryLabels = append(related.R.SummaryLabels, o)
+		related.R.Labels = append(related.R.Labels, o)
 	}
 
 	return nil
 }
 
-// SummaryLabels retrieves all the records using an executor.
-func SummaryLabels(mods ...qm.QueryMod) summaryLabelQuery {
-	mods = append(mods, qm.From("\"summary_labels\""))
-	return summaryLabelQuery{NewQuery(mods...)}
+// Labels retrieves all the records using an executor.
+func Labels(mods ...qm.QueryMod) labelQuery {
+	mods = append(mods, qm.From("\"labels\""))
+	return labelQuery{NewQuery(mods...)}
 }
 
-// FindSummaryLabel retrieves a single record by ID with an executor.
+// FindLabel retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindSummaryLabel(ctx context.Context, exec boil.ContextExecutor, iD string, selectCols ...string) (*SummaryLabel, error) {
-	summaryLabelObj := &SummaryLabel{}
+func FindLabel(ctx context.Context, exec boil.ContextExecutor, iD string, selectCols ...string) (*Label, error) {
+	labelObj := &Label{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"summary_labels\" where \"id\"=$1", sel,
+		"select %s from \"labels\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, summaryLabelObj)
+	err := q.Bind(ctx, exec, labelObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from summary_labels")
+		return nil, errors.Wrap(err, "models: unable to select from labels")
 	}
 
-	return summaryLabelObj, nil
+	return labelObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *SummaryLabel) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Label) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no summary_labels provided for insertion")
+		return errors.New("models: no labels provided for insertion")
 	}
 
 	var err error
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
-		}
-		if queries.MustTime(o.UpdatedAt).IsZero() {
-			queries.SetScanner(&o.UpdatedAt, currTime)
 		}
 	}
 
@@ -776,33 +778,33 @@ func (o *SummaryLabel) Insert(ctx context.Context, exec boil.ContextExecutor, co
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(summaryLabelColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(labelColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	summaryLabelInsertCacheMut.RLock()
-	cache, cached := summaryLabelInsertCache[key]
-	summaryLabelInsertCacheMut.RUnlock()
+	labelInsertCacheMut.RLock()
+	cache, cached := labelInsertCache[key]
+	labelInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			summaryLabelAllColumns,
-			summaryLabelColumnsWithDefault,
-			summaryLabelColumnsWithoutDefault,
+			labelAllColumns,
+			labelColumnsWithDefault,
+			labelColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(summaryLabelType, summaryLabelMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(labelType, labelMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(summaryLabelType, summaryLabelMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(labelType, labelMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"summary_labels\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"labels\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"summary_labels\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"labels\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -830,26 +832,26 @@ func (o *SummaryLabel) Insert(ctx context.Context, exec boil.ContextExecutor, co
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into summary_labels")
+		return errors.Wrap(err, "models: unable to insert into labels")
 	}
 
 	if !cached {
-		summaryLabelInsertCacheMut.Lock()
-		summaryLabelInsertCache[key] = cache
-		summaryLabelInsertCacheMut.Unlock()
+		labelInsertCacheMut.Lock()
+		labelInsertCache[key] = cache
+		labelInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// Update uses an executor to update the SummaryLabel.
+// Update uses an executor to update the Label.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *SummaryLabel) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Label) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		queries.SetScanner(&o.UpdatedAt, currTime)
+		o.UpdatedAt = currTime
 	}
 
 	var err error
@@ -857,28 +859,28 @@ func (o *SummaryLabel) Update(ctx context.Context, exec boil.ContextExecutor, co
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	summaryLabelUpdateCacheMut.RLock()
-	cache, cached := summaryLabelUpdateCache[key]
-	summaryLabelUpdateCacheMut.RUnlock()
+	labelUpdateCacheMut.RLock()
+	cache, cached := labelUpdateCache[key]
+	labelUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			summaryLabelAllColumns,
-			summaryLabelPrimaryKeyColumns,
+			labelAllColumns,
+			labelPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update summary_labels, could not build whitelist")
+			return 0, errors.New("models: unable to update labels, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"summary_labels\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"labels\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
-			strmangle.WhereClause("\"", "\"", len(wl)+1, summaryLabelPrimaryKeyColumns),
+			strmangle.WhereClause("\"", "\"", len(wl)+1, labelPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(summaryLabelType, summaryLabelMapping, append(wl, summaryLabelPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(labelType, labelMapping, append(wl, labelPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -894,42 +896,42 @@ func (o *SummaryLabel) Update(ctx context.Context, exec boil.ContextExecutor, co
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update summary_labels row")
+		return 0, errors.Wrap(err, "models: unable to update labels row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for summary_labels")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for labels")
 	}
 
 	if !cached {
-		summaryLabelUpdateCacheMut.Lock()
-		summaryLabelUpdateCache[key] = cache
-		summaryLabelUpdateCacheMut.Unlock()
+		labelUpdateCacheMut.Lock()
+		labelUpdateCache[key] = cache
+		labelUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q summaryLabelQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q labelQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for summary_labels")
+		return 0, errors.Wrap(err, "models: unable to update all for labels")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for summary_labels")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for labels")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o SummaryLabelSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o LabelSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -951,13 +953,13 @@ func (o SummaryLabelSlice) UpdateAll(ctx context.Context, exec boil.ContextExecu
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), summaryLabelPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), labelPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"summary_labels\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"labels\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, summaryLabelPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, labelPrimaryKeyColumns, len(o)))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -966,36 +968,36 @@ func (o SummaryLabelSlice) UpdateAll(ctx context.Context, exec boil.ContextExecu
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in summaryLabel slice")
+		return 0, errors.Wrap(err, "models: unable to update all in label slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all summaryLabel")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all label")
 	}
 	return rowsAff, nil
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *SummaryLabel) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *Label) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no summary_labels provided for upsert")
+		return errors.New("models: no labels provided for upsert")
 	}
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
+		o.UpdatedAt = currTime
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
-		queries.SetScanner(&o.UpdatedAt, currTime)
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(summaryLabelColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(labelColumnsWithDefault, o)
 
 	// Build cache key in-line uglily - mysql vs psql problems
 	buf := strmangle.GetBuffer()
@@ -1025,41 +1027,41 @@ func (o *SummaryLabel) Upsert(ctx context.Context, exec boil.ContextExecutor, up
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	summaryLabelUpsertCacheMut.RLock()
-	cache, cached := summaryLabelUpsertCache[key]
-	summaryLabelUpsertCacheMut.RUnlock()
+	labelUpsertCacheMut.RLock()
+	cache, cached := labelUpsertCache[key]
+	labelUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			summaryLabelAllColumns,
-			summaryLabelColumnsWithDefault,
-			summaryLabelColumnsWithoutDefault,
+			labelAllColumns,
+			labelColumnsWithDefault,
+			labelColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			summaryLabelAllColumns,
-			summaryLabelPrimaryKeyColumns,
+			labelAllColumns,
+			labelPrimaryKeyColumns,
 		)
 
 		if updateOnConflict && len(update) == 0 {
-			return errors.New("models: unable to upsert summary_labels, could not build update column list")
+			return errors.New("models: unable to upsert labels, could not build update column list")
 		}
 
 		conflict := conflictColumns
 		if len(conflict) == 0 {
-			conflict = make([]string, len(summaryLabelPrimaryKeyColumns))
-			copy(conflict, summaryLabelPrimaryKeyColumns)
+			conflict = make([]string, len(labelPrimaryKeyColumns))
+			copy(conflict, labelPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"summary_labels\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"labels\"", updateOnConflict, ret, update, conflict, insert)
 
-		cache.valueMapping, err = queries.BindMapping(summaryLabelType, summaryLabelMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(labelType, labelMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(summaryLabelType, summaryLabelMapping, ret)
+			cache.retMapping, err = queries.BindMapping(labelType, labelMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -1087,31 +1089,31 @@ func (o *SummaryLabel) Upsert(ctx context.Context, exec boil.ContextExecutor, up
 		_, err = exec.ExecContext(ctx, cache.query, vals...)
 	}
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert summary_labels")
+		return errors.Wrap(err, "models: unable to upsert labels")
 	}
 
 	if !cached {
-		summaryLabelUpsertCacheMut.Lock()
-		summaryLabelUpsertCache[key] = cache
-		summaryLabelUpsertCacheMut.Unlock()
+		labelUpsertCacheMut.Lock()
+		labelUpsertCache[key] = cache
+		labelUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single SummaryLabel record with an executor.
+// Delete deletes a single Label record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *SummaryLabel) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Label) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no SummaryLabel provided for delete")
+		return 0, errors.New("models: no Label provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), summaryLabelPrimaryKeyMapping)
-	sql := "DELETE FROM \"summary_labels\" WHERE \"id\"=$1"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), labelPrimaryKeyMapping)
+	sql := "DELETE FROM \"labels\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1120,12 +1122,12 @@ func (o *SummaryLabel) Delete(ctx context.Context, exec boil.ContextExecutor) (i
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from summary_labels")
+		return 0, errors.Wrap(err, "models: unable to delete from labels")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for summary_labels")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for labels")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -1136,33 +1138,33 @@ func (o *SummaryLabel) Delete(ctx context.Context, exec boil.ContextExecutor) (i
 }
 
 // DeleteAll deletes all matching rows.
-func (q summaryLabelQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q labelQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no summaryLabelQuery provided for delete all")
+		return 0, errors.New("models: no labelQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from summary_labels")
+		return 0, errors.Wrap(err, "models: unable to delete all from labels")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for summary_labels")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for labels")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o SummaryLabelSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o LabelSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(summaryLabelBeforeDeleteHooks) != 0 {
+	if len(labelBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1172,12 +1174,12 @@ func (o SummaryLabelSlice) DeleteAll(ctx context.Context, exec boil.ContextExecu
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), summaryLabelPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), labelPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"summary_labels\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, summaryLabelPrimaryKeyColumns, len(o))
+	sql := "DELETE FROM \"labels\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, labelPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1186,15 +1188,15 @@ func (o SummaryLabelSlice) DeleteAll(ctx context.Context, exec boil.ContextExecu
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from summaryLabel slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from label slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for summary_labels")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for labels")
 	}
 
-	if len(summaryLabelAfterDeleteHooks) != 0 {
+	if len(labelAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1207,8 +1209,8 @@ func (o SummaryLabelSlice) DeleteAll(ctx context.Context, exec boil.ContextExecu
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *SummaryLabel) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindSummaryLabel(ctx, exec, o.ID)
+func (o *Label) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindLabel(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1219,26 +1221,26 @@ func (o *SummaryLabel) Reload(ctx context.Context, exec boil.ContextExecutor) er
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *SummaryLabelSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *LabelSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := SummaryLabelSlice{}
+	slice := LabelSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), summaryLabelPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), labelPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"summary_labels\".* FROM \"summary_labels\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, summaryLabelPrimaryKeyColumns, len(*o))
+	sql := "SELECT \"labels\".* FROM \"labels\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, labelPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in SummaryLabelSlice")
+		return errors.Wrap(err, "models: unable to reload all in LabelSlice")
 	}
 
 	*o = slice
@@ -1246,10 +1248,10 @@ func (o *SummaryLabelSlice) ReloadAll(ctx context.Context, exec boil.ContextExec
 	return nil
 }
 
-// SummaryLabelExists checks if the SummaryLabel row exists.
-func SummaryLabelExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
+// LabelExists checks if the Label row exists.
+func LabelExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"summary_labels\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"labels\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1260,7 +1262,7 @@ func SummaryLabelExists(ctx context.Context, exec boil.ContextExecutor, iD strin
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if summary_labels exists")
+		return false, errors.Wrap(err, "models: unable to check if labels exists")
 	}
 
 	return exists, nil

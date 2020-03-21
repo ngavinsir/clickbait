@@ -17,6 +17,10 @@ func InitDB() (*DB, error) {
 		conn = envConn
 	}
 
+    return Connect(conn)
+}
+
+func Connect(conn string) (*DB, error) {
     db, err := sql.Open("postgres", conn)
     if err != nil {
         return nil, err

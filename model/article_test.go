@@ -2,55 +2,58 @@ package model
 
 import (
 	"context"
-	"database/sql/driver"
 	"testing"
-
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/segmentio/ksuid"
 )
 
-func TestInsertArticle(t *testing.T) {
-	db, mock, err := sqlmock.New()
+const (
+	testHeadline = "TEST_HEADLINE"
+	testContent = "TEST_CONTENT"
+)
+
+func TestArticle(t *testing.T) {
+	db, err := ConnectTestDB()
 	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		t.Error(err)
+		return
 	}
-	defer db.Close()
+	defer func() {
+		ResetTestDB(db)
+		db.Close()
+	}()
+	
+	t.Run("Insert", testInsertArticle(&ArticleDatastore{DB: db}))
+}
 
-	testID := ksuid.New().String()
-	testHeadline := "test_article_value"
-	testContent := "test_article_content"
-	mock.ExpectExec(`INSERT INTO "articles"`).WithArgs(testID, testHeadline, testContent).WillReturnResult(sqlmock.NewResult(1, 1))
+func testInsertArticle(articleRepository ArticleRepository) func (t *testing.T) {
+	return func(t *testing.T) {
+		article, err := articleRepository.InsertArticle(context.Background(), testHeadline, testContent)
+		if err != nil {
+			t.Error(err)
+		}
 
-	_, err = insertArticleWithID(context.Background(), db, testID, testHeadline, testContent)
-	if err != nil {
-		t.Fatalf("error was not expected while inserting new article: %s", err)
-	}
+		if article.Headline != testHeadline {
+			t.Errorf("Want article headline %s, got %s", testHeadline, article.Headline)
+		}
+		if article.Content != testContent {
+			t.Errorf("Want article content %s, got %s", testContent, article.Content)
+		}
 
-	if err = mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
+		t.Run("Get Random", testGetRandomArticle(articleRepository))
 	}
 }
 
-func TestGetRandomarticle(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	defer db.Close()
-
-	testUserID := "test_user_id"
-	ret := sqlmock.NewRows([]string{"id", "value"})
-	ret.AddRow(driver.Value(testUserID), driver.Value("test_article_value_1"))
-	ret.AddRow(driver.Value(testUserID), driver.Value("test_article_value_2"))
-
-	mock.ExpectQuery(`select h.id, h.value`).WithArgs(testUserID, 3).WillReturnRows(ret)
-
-	_, err = GetRandomArticle(context.Background(), db, testUserID, "")
-	if err != nil {
-		t.Fatalf("error was not expected while getting random article: %s", err)
-	}
-
-	if err = mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
+func testGetRandomArticle(articleRepository ArticleRepository) func(t *testing.T) {
+	return func(t *testing.T) {
+		article, err := articleRepository.GetRandomArticle(context.Background(), "a", "a")
+		if err != nil {
+			t.Error(err)
+		}
+		
+		if article.Headline != testHeadline {
+			t.Errorf("Want article headline %s, got %s", testHeadline, article.Headline)
+		}
+		if article.Content != testContent {
+			t.Errorf("Want article content %s, got %s", testContent, article.Content)
+		}
 	}
 }

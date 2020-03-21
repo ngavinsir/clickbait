@@ -41,12 +41,12 @@ func main() {
 
 	router.Group(func(router chi.Router) {
 		router.Use(handlers.AuthMiddleware)
-		
+
 		router.Route("/{labelType}", func(router chi.Router) {
 			router.Route("/article", func(router chi.Router) {
 				router.Get("/random", env.RandomArticle)
 			})
-	
+
 			router.Route("/label", func(router chi.Router) {
 				router.Get("/", env.GetAllLabel)
 				router.Post("/", env.AddLabel)
@@ -54,10 +54,10 @@ func main() {
 					router.Delete("/", env.DeleteLabel)
 				})
 			})
-	
+
 			router.Post("/labeling", env.Labeling)
 		})
-		
+
 		router.Post("/article", env.AddArticle)
 	})
 

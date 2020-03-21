@@ -12,21 +12,21 @@ type DB struct {
 
 // InitDB opens new db connection by url.
 func InitDB() (*DB, error) {
-    conn := "dbname=clickbait host=localhost user=postgres password=postgres"
+	conn := "dbname=clickbait host=localhost user=postgres password=postgres"
 	if envConn := os.Getenv("DATABASE_URL"); envConn != "" {
 		conn = envConn
 	}
 
-    return Connect(conn)
+	return Connect(conn)
 }
 
 func Connect(conn string) (*DB, error) {
-    db, err := sql.Open("postgres", conn)
-    if err != nil {
-        return nil, err
-    }
-    if err = db.Ping(); err != nil {
-        return nil, err
-    }
-    return &DB{db}, nil
+	db, err := sql.Open("postgres", conn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+	return &DB{db}, nil
 }

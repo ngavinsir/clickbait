@@ -36,8 +36,8 @@ func ResetTestDB(db *DB) error {
 
 func initTestRepository(db *DB) *testRepository {
 	return &testRepository{
-		UserRepository: &UserDatastore{DB: db},
+		UserRepository:    &UserDatastore{DB: db},
 		ArticleRepository: &ArticleDatastore{DB: db},
-		LabelRepository: &LabelDatastore{DB: db},
+		LabelRepository:   &LabelDatastore{DB: db},
 	}
 }

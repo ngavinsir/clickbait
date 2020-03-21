@@ -12,11 +12,11 @@ import (
 
 // LabelRepository handles label data management.
 type LabelRepository interface {
-	InsertLabel(ctx context.Context, userID string, articleID string, value string, labelType string)	(*models.Label, error)
-	IsLabeledByUser(ctx context.Context, articleID string, userID string, labelType string)				(bool, error)
-	DeleteLabel(ctx context.Context, labelID string)													error
-	GetArticleLabel(ctx context.Context, userID string, labelType string)								([]*ArticleLabel, error)
-	GetArticleLabelCount(ctx context.Context, articleID string, labelType string)						(int64, error)
+	InsertLabel(ctx context.Context, userID string, articleID string, value string, labelType string) (*models.Label, error)
+	IsLabeledByUser(ctx context.Context, articleID string, userID string, labelType string) (bool, error)
+	DeleteLabel(ctx context.Context, labelID string) error
+	GetArticleLabel(ctx context.Context, userID string, labelType string) ([]*ArticleLabel, error)
+	GetArticleLabelCount(ctx context.Context, articleID string, labelType string) (int64, error)
 }
 
 // LabelDatastore holds db information.
@@ -54,7 +54,7 @@ func (db *LabelDatastore) InsertLabel(ctx context.Context, userID string, articl
 		UserID:    userID,
 		ArticleID: articleID,
 		Value:     value,
-		Type: 	   labelType,
+		Type:      labelType,
 	}
 	if err := label.Insert(ctx, db, boil.Infer()); err != nil {
 		return nil, err
@@ -110,8 +110,8 @@ func (db *LabelDatastore) GetArticleLabel(ctx context.Context, userID string, la
 // GetArticleLabelCount returns label count by headline id.
 func (db *LabelDatastore) GetArticleLabelCount(ctx context.Context, articleID string, labelType string) (int64, error) {
 	labelCount, err := models.Labels(
-			models.LabelWhere.ArticleID.EQ(articleID),
-			models.LabelWhere.Type.EQ(labelType),
+		models.LabelWhere.ArticleID.EQ(articleID),
+		models.LabelWhere.Type.EQ(labelType),
 	).Count(ctx, db)
 	if err != nil {
 		return 0, err

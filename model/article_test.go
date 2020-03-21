@@ -9,7 +9,7 @@ import (
 
 const (
 	testHeadline = "TEST_HEADLINE"
-	testContent = "TEST_CONTENT"
+	testContent  = "TEST_CONTENT"
 )
 
 func TestArticle(t *testing.T) {
@@ -22,7 +22,7 @@ func TestArticle(t *testing.T) {
 		ResetTestDB(db)
 		db.Close()
 	}()
-	
+
 	testRepository := initTestRepository(db)
 
 	t.Run("Insert", testInsertArticle(testRepository))
@@ -65,7 +65,7 @@ func testGetRandomArticle(testRepository *testRepository, articleID string) func
 			if err != nil {
 				t.Error(err)
 			}
-			
+
 			if article.Headline != testHeadline {
 				t.Errorf("Want article headline %s, got %s", testHeadline, article.Headline)
 			}
@@ -96,7 +96,7 @@ func testGetRandomArticle(testRepository *testRepository, articleID string) func
 			if err != nil {
 				t.Error(err)
 			}
-			
+
 			if article.Headline != testHeadline {
 				t.Errorf("Want article headline %s, got %s", testHeadline, article.Headline)
 			}

@@ -19,7 +19,7 @@ var jwtAuth = jwtauth.New("HS256", []byte("clickbait^secret"), nil)
 var UserIDCtxKey = &contextKey{"User_id"}
 
 // Register new user handler
-func (env *Env)  Register(w http.ResponseWriter, r *http.Request)  {
+func (env *Env) Register(w http.ResponseWriter, r *http.Request) {
 	data := &RegisterRequest{}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -42,7 +42,7 @@ func (env *Env)  Register(w http.ResponseWriter, r *http.Request)  {
 }
 
 // Login handler
-func (env *Env) Login(w http.ResponseWriter, r *http.Request)  {
+func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 	data := &LoginRequest{}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))

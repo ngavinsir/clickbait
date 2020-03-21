@@ -17,7 +17,7 @@ func TestLabel(t *testing.T) {
 		ResetTestDB(db)
 		db.Close()
 	}()
-	
+
 	testRepository := initTestRepository(db)
 
 	user, err := testRepository.CreateNewUser(context.Background(), &models.User{
@@ -32,7 +32,7 @@ func TestLabel(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	t.Run("Insert", testInsertLabel(testRepository, user.ID, article.ID))
 }
 

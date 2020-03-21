@@ -12,8 +12,8 @@ import (
 
 // ArticleRepository handles article data management.
 type ArticleRepository interface {
-	InsertArticle(ctx context.Context, headline string, content string) 	(*models.Article, error)
-	GetRandomArticle(ctx context.Context, userID string, labelType string)	(*models.Article, error)
+	InsertArticle(ctx context.Context, headline string, content string) (*models.Article, error)
+	GetRandomArticle(ctx context.Context, userID string, labelType string) (*models.Article, error)
 }
 
 // ArticleDatastore holds db information.

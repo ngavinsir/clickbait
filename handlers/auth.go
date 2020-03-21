@@ -2,16 +2,14 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
+	"github.com/ngavinsir/clickbait/model"
 	"github.com/ngavinsir/clickbait/models"
-	"github.com/segmentio/ksuid"
-	"github.com/volatiletech/sqlboiler/boil"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,57 +19,47 @@ var jwtAuth = jwtauth.New("HS256", []byte("clickbait^secret"), nil)
 var UserIDCtxKey = &contextKey{"User_id"}
 
 // Register new user handler
-func Register(db *sql.DB) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data := &RegisterRequest{}
-		if err := render.Bind(r, data); err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
+func (env *Env)  Register(w http.ResponseWriter, r *http.Request)  {
+	data := &RegisterRequest{}
+	if err := render.Bind(r, data); err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
 
-		hash, _ := hashPassword(data.Password)
-		user := &models.User{
-			ID:       ksuid.New().String(),
-			Username: data.Username,
-			Password: hash,
-		}
+	_, err := env.userRepository.CreateNewUser(r.Context(), data.User)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 
-		if err := user.Insert(r.Context(), db, boil.Infer()); err != nil {
-			render.Render(w, r, ErrRender(err))
-			return
-		}
+	tokenString, err := loginLogic(r.Context(), env.userRepository, data.User)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 
-		tokenString, err := loginLogic(r.Context(), db, data.User)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-			return
-		}
-
-		render.JSON(w, r, tokenString)
-	})
+	render.JSON(w, r, tokenString)
 }
 
 // Login handler
-func Login(db *sql.DB) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data := &LoginRequest{}
-		if err := render.Bind(r, data); err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
+func (env *Env) Login(w http.ResponseWriter, r *http.Request)  {
+	data := &LoginRequest{}
+	if err := render.Bind(r, data); err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
 
-		tokenString, err := loginLogic(r.Context(), db, data.User)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-			return
-		}
+	tokenString, err := loginLogic(r.Context(), env.userRepository, data.User)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 
-		render.JSON(w, r, tokenString)
-	})
+	render.JSON(w, r, tokenString)
 }
 
-func loginLogic(ctx context.Context, exec boil.ContextExecutor, data *models.User) (string, error) {
-	user, err := models.Users(models.UserWhere.Username.EQ(data.Username)).One(ctx, exec)
+func loginLogic(ctx context.Context, userRepository model.UserRepository, data *models.User) (string, error) {
+	user, err := userRepository.GetUser(ctx, data.Username)
 	if err != nil {
 		return "", err
 	}
@@ -86,11 +74,6 @@ func loginLogic(ctx context.Context, exec boil.ContextExecutor, data *models.Use
 	})
 
 	return tokenString, nil
-}
-
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
-	return string(bytes), err
 }
 
 func checkPasswordHash(password, hash string) bool {

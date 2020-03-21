@@ -36,8 +36,8 @@ func main() {
 	})
 	router.Use(c.Handler)
 
-	router.Post("/register", handlers.Register(db.DB))
-	router.Post("/login", handlers.Login(db.DB))
+	router.Post("/register", env.Register)
+	router.Post("/login", env.Login)
 
 	router.Group(func(router chi.Router) {
 		router.Use(handlers.AuthMiddleware)

@@ -21,7 +21,7 @@ import (
 func main() {
 	router := chi.NewRouter()
 
-	db, err := setupDB()
+	db, err := model.InitDB()
 	handleErr(err)
 	log.Println("connected to db")
 
@@ -75,15 +75,6 @@ func handleErr(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func setupDB() (*model.DB, error) {
-	conn := "dbname=clickbait host=localhost user=postgres password=postgres"
-	if envConn := os.Getenv("DATABASE_URL"); envConn != "" {
-		conn = envConn
-	}
-
-	return model.InitDB(conn)
 }
 
 func inputDataset(datasetPath string, db *model.DB) {

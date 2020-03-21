@@ -31,6 +31,9 @@ func testInsertArticle(articleRepository ArticleRepository) func (t *testing.T) 
 			t.Error(err)
 		}
 
+		if article.ID == "" {
+			t.Errorf("Want article id assigned, got %s", article.ID)
+		}
 		if article.Headline != testHeadline {
 			t.Errorf("Want article headline %s, got %s", testHeadline, article.Headline)
 		}

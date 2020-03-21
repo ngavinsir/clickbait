@@ -7,6 +7,12 @@ import (
 	"github.com/ngavinsir/clickbait/models"
 )
 
+type testRepository struct {
+	UserRepository
+	LabelRepository
+	ArticleRepository
+}
+
 // ConnectTestDB connects to test db.
 func ConnectTestDB() (*DB, error) {
 	conn := "dbname=clickbait_test host=localhost user=postgres password=postgres"
@@ -26,4 +32,12 @@ func ResetTestDB(db *DB) error {
 
 	err = tx.Commit()
 	return err
+}
+
+func initTestRepository(db *DB) *testRepository {
+	return &testRepository{
+		UserRepository: &UserDatastore{DB: db},
+		ArticleRepository: &ArticleDatastore{DB: db},
+		LabelRepository: &LabelDatastore{DB: db},
+	}
 }

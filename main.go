@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -15,7 +14,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/ngavinsir/clickbait/handlers"
 	"github.com/ngavinsir/clickbait/model"
-	"github.com/volatiletech/sqlboiler/boil"
 )
 
 //go:generate sqlboiler --wipe psql
@@ -27,6 +25,8 @@ func main() {
 	handleErr(err)
 	log.Println("connected to db")
 
+	env := handlers.CreateEnv(db)
+
 	//inputDataset("./dataset/cnn.csv", db)
 
 	c := cors.New(cors.Options{
@@ -36,29 +36,29 @@ func main() {
 	})
 	router.Use(c.Handler)
 
-	router.Post("/register", handlers.Register(db))
-	router.Post("/login", handlers.Login(db))
+	router.Post("/register", handlers.Register(db.DB))
+	router.Post("/login", handlers.Login(db.DB))
 
 	router.Group(func(router chi.Router) {
 		router.Use(handlers.AuthMiddleware)
 		
 		router.Route("/{labelType}", func(router chi.Router) {
 			router.Route("/article", func(router chi.Router) {
-				router.Get("/random", handlers.RandomArticle(db))
+				router.Get("/random", env.RandomArticle)
 			})
 	
 			router.Route("/label", func(router chi.Router) {
-				router.Get("/", handlers.GetAllLabel(db))
-				router.Post("/", handlers.AddLabel(db))
+				router.Get("/", env.GetAllLabel)
+				router.Post("/", env.AddLabel)
 				router.Route("/{labelID}", func(router chi.Router) {
-					router.Delete("/", handlers.DeleteLabel(db))
+					router.Delete("/", env.DeleteLabel)
 				})
 			})
 	
-			router.Post("/labeling", handlers.Labeling(db))
+			router.Post("/labeling", env.Labeling)
 		})
 		
-		router.Post("/article", handlers.AddArticle(db))
+		router.Post("/article", env.AddArticle)
 	})
 
 	name, _ := os.Executable()
@@ -77,26 +77,27 @@ func handleErr(err error) {
 	}
 }
 
-func setupDB() (*sql.DB, error) {
+func setupDB() (*model.DB, error) {
 	conn := "dbname=clickbait host=localhost user=postgres password=postgres"
 	if envConn := os.Getenv("DATABASE_URL"); envConn != "" {
 		conn = envConn
 	}
 
-	return sql.Open("postgres", conn)
+	return model.InitDB(conn)
 }
 
-func inputDataset(datasetPath string, exec boil.ContextExecutor) {
+func inputDataset(datasetPath string, db *model.DB) {
 	csvfile, err := os.Open(datasetPath)
 	if err != nil {
 		log.Fatalln("Couldn't open the csv file", err)
 	}
+	articleRepository := &model.ArticleDatastore{db}
 
 	i := 0
 	for row := range processCSV(csvfile) {
 		i++
 		log.Printf("%s\n", row[2])
-		model.InsertArticle(context.Background(), exec, row[2], row[0])
+		articleRepository.InsertArticle(context.Background(), row[2], row[0])
 	}
 }
 

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"errors"
 	"net/http"
 
@@ -12,85 +11,77 @@ import (
 )
 
 // AddLabel handler
-func AddLabel(db *sql.DB) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userID, _ := r.Context().Value(UserIDCtxKey).(string)
-		labelType := chi.URLParam(r, "labelType")
+func (env *Env) AddLabel(w http.ResponseWriter, r *http.Request) {
+	userID, _ := r.Context().Value(UserIDCtxKey).(string)
+	labelType := chi.URLParam(r, "labelType")
 
-		data := &LabelRequest{}
-		if err := render.Bind(r, data); err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
+	data := &LabelRequest{}
+	if err := render.Bind(r, data); err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
 
-		label, err := model.InsertLabel(r.Context(), db, userID, data.ArticleID, data.Value, labelType)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-			return
-		}
+	label, err := env.labelRepository.InsertLabel(r.Context(), userID, data.ArticleID, data.Value, labelType)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 
-		render.JSON(w, r, label)
-	})
+	render.JSON(w, r, label)
 }
 
 // DeleteLabel handler
-func DeleteLabel(db *sql.DB) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		labelID := chi.URLParam(r, "labelID")
-		if labelID == "" {
-			render.Render(w, r, ErrRender(errors.New(ErrMissingReqFields)))
-		}
+func (env *Env) DeleteLabel(w http.ResponseWriter, r *http.Request) {
+	labelID := chi.URLParam(r, "labelID")
+	if labelID == "" {
+		render.Render(w, r, ErrRender(errors.New(ErrMissingReqFields)))
+	}
 
-		err := model.DeleteLabel(r.Context(), db, labelID)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-			return
-		}
-	})
+	err := env.labelRepository.DeleteLabel(r.Context(), labelID)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 }
 
 // GetAllLabel handler
-func GetAllLabel(db *sql.DB) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userID, _ := r.Context().Value(UserIDCtxKey).(string)
-		labelType := chi.URLParam(r, "labelType")
+func (env *Env) GetAllLabel(w http.ResponseWriter, r *http.Request) {
+	userID, _ := r.Context().Value(UserIDCtxKey).(string)
+	labelType := chi.URLParam(r, "labelType")
 
-		labels := []*model.ArticleLabel{}
-		labels, err := model.GetArticleLabel(r.Context(), db, userID, labelType)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-			return
-		}
+	labels := []*model.ArticleLabel{}
+	labels, err := env.labelRepository.GetArticleLabel(r.Context(), userID, labelType)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 
-		render.JSON(w, r, labels)
-	})
+	render.JSON(w, r, labels)
 }
 
 // Labeling handler return new headline after labeled previous headline
-func Labeling(db *sql.DB) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userID, _ := r.Context().Value(UserIDCtxKey).(string)
-		labelType := chi.URLParam(r, "labelType")
+func (env *Env) Labeling(w http.ResponseWriter, r *http.Request) {
+	userID, _ := r.Context().Value(UserIDCtxKey).(string)
+	labelType := chi.URLParam(r, "labelType")
 
-		data := &LabelRequest{}
-		if err := render.Bind(r, data); err != nil {
-			render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
+	data := &LabelRequest{}
+	if err := render.Bind(r, data); err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
 
-		response := &ClickbaitResponse{}
-		label, err := model.InsertLabel(r.Context(), db, userID, data.ArticleID, data.Value, labelType)
-		if err != nil {
-			render.Render(w, r, ErrRender(err))
-			return
-		}
-		response.LabelID = label.ID
+	response := &ClickbaitResponse{}
+	label, err := env.labelRepository.InsertLabel(r.Context(), userID, data.ArticleID, data.Value, labelType)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+	response.LabelID = label.ID
 
-		article, _ := model.GetRandomArticle(r.Context(), db, userID, labelType)
-		response.Article = article
+	article, _ := env.articleRepository.GetRandomArticle(r.Context(), userID, labelType)
+	response.Article = article
 
-		render.JSON(w, r, response)
-	})
+	render.JSON(w, r, response)
 }
 
 // LabelRequest for add label handler request

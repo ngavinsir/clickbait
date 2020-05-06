@@ -16,7 +16,7 @@ type testRepository struct {
 // ConnectTestDB connects to test db.
 func ConnectTestDB() (*DB, error) {
 	conn := "dbname=clickbait_test host=localhost user=postgres password=postgres"
-	return Connect(conn)
+	return Connect(conn, "file://../migrations")
 }
 
 // ResetTestDB clears test db data.

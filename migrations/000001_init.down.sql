@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS labels;
+
+DROP TABLE IF EXISTS articles;
+
+DROP TABLE IF EXISTS users;

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"regexp"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
@@ -14,6 +15,7 @@ import (
 )
 
 var jwtAuth = jwtauth.New("HS256", []byte("clickbait^secret"), nil)
+var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // UserIDCtxKey to extract user id from context
 var UserIDCtxKey = &contextKey{"User_id"}
@@ -23,6 +25,11 @@ func (env *Env) Register(w http.ResponseWriter, r *http.Request) {
 	data := &RegisterRequest{}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	if !emailRegexp.MatchString(data.Email) {
+		render.Render(w, r, ErrRender(errors.New("invalid email")))
 		return
 	}
 

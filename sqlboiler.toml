@@ -5,4 +5,4 @@
   user   = "postgres"
   pass   = "postgres"
   schema = "public"
-  blacklist = ["migrations", "other"]
+  blacklist = ["schema_migrations"]

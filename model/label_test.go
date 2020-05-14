@@ -22,7 +22,7 @@ func TestLabel(t *testing.T) {
 	testRepository := initTestRepository(db)
 
 	user, err := testRepository.CreateNewUser(context.Background(), &models.User{
-		Username: "a",
+		Email: "a",
 		Password: "b",
 	})
 	if err != nil {

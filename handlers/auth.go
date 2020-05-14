@@ -4,19 +4,33 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
+	"regexp"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
+	"github.com/joho/godotenv"
 	"github.com/ngavinsir/clickbait/model"
 	"github.com/ngavinsir/clickbait/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtAuth = jwtauth.New("HS256", []byte("clickbait^secret"), nil)
+var jwtAuth *jwtauth.JWTAuth
+var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-// UserIDCtxKey to extract user id from context
-var UserIDCtxKey = &contextKey{"User_id"}
+// UserCtxKey to extract user from context
+var UserCtxKey = &contextKey{"User"}
+
+func init() {
+	godotenv.Load()
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		panic(errors.New("env JWT_SECRET not provided"))
+	}
+	jwtAuth = jwtauth.New("HS256", []byte(jwtSecret), nil)
+}
 
 // Register new user handler
 func (env *Env) Register(w http.ResponseWriter, r *http.Request) {
@@ -26,12 +40,19 @@ func (env *Env) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !emailRegexp.MatchString(data.Email) {
+		render.Render(w, r, ErrRender(errors.New("invalid email")))
+		return
+	}
+
+	password := data.User.Password
 	_, err := env.userRepository.CreateNewUser(r.Context(), data.User)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
 
+	data.User.Password = password
 	tokenString, err := loginLogic(r.Context(), env.userRepository, data.User)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
@@ -59,7 +80,7 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginLogic(ctx context.Context, userRepository model.UserRepository, data *models.User) (string, error) {
-	user, err := userRepository.GetUser(ctx, data.Username)
+	user, err := userRepository.GetUser(ctx, data.Email)
 	if err != nil {
 		return "", err
 	}
@@ -70,7 +91,8 @@ func loginLogic(ctx context.Context, userRepository model.UserRepository, data *
 
 	_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
 		"user_id":  user.ID,
-		"username": user.Username,
+		"email": user.Email,
+		"name": user.Name,
 	})
 
 	return tokenString, nil
@@ -82,27 +104,41 @@ func checkPasswordHash(password, hash string) bool {
 }
 
 // AuthMiddleware to handle request jwt token
-func AuthMiddleware(next http.Handler) http.Handler {
-	return jwtauth.Verifier(jwtAuth)(extractUserID(next))
+func (env *Env) AuthMiddleware(next http.Handler) http.Handler {
+	return jwtauth.Verifier(jwtAuth)(extractUser(env.userRepository)(next))
 }
 
-func extractUserID(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, claims, err := jwtauth.FromContext(r.Context())
+func extractUser(repo model.UserRepository) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token, claims, err := jwtauth.FromContext(r.Context())
 
-		if err != nil {
-			http.Error(w, http.StatusText(401), 401)
-			return
-		}
+			if err != nil {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
 
-		if token == nil || !token.Valid {
-			http.Error(w, http.StatusText(401), 401)
-			return
-		}
+			if token == nil || !token.Valid {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
 
-		ctx := context.WithValue(r.Context(), UserIDCtxKey, claims["user_id"])
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+			userID := claims["user_id"].(string)
+			if userID == "" {
+				render.Render(w, r, ErrRender(errors.New("invalid user id")))
+				return
+			}
+
+			user, err := repo.GetUserbyID(r.Context(), userID)
+			if err != nil {
+				render.Render(w, r, ErrRender(errors.New("invalid user")))
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), UserCtxKey, user)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
 // RegisterRequest struct
@@ -110,9 +146,9 @@ type RegisterRequest struct {
 	*models.User
 }
 
-// Bind RegisterRequest (Username, Password) [Required]
+// Bind RegisterRequest (Email, Password, Age, Name) [Required]
 func (req *RegisterRequest) Bind(r *http.Request) error {
-	if req.Username == "" || req.Password == "" {
+	if req.Email == "" || req.Password == "" || req.Age <= 0 || req.Name == "" {
 		return errors.New(ErrMissingReqFields)
 	}
 
@@ -124,9 +160,9 @@ type LoginRequest struct {
 	*models.User
 }
 
-// Bind LoginRequest (Username, Password) [Required]
+// Bind LoginRequest (Email, Password) [Required]
 func (req *LoginRequest) Bind(r *http.Request) error {
-	if req.Username == "" || req.Password == "" {
+	if req.Email == "" || req.Password == "" {
 		return errors.New(ErrMissingReqFields)
 	}
 

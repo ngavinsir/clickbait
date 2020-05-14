@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ngavinsir/clickbait/models"
 	"github.com/segmentio/ksuid"
@@ -12,7 +13,8 @@ import (
 // UserRepository handles user data management.
 type UserRepository interface {
 	CreateNewUser(ctx context.Context, data *models.User) (*models.User, error)
-	GetUser(ctx context.Context, username string) (*models.User, error)
+	GetUser(ctx context.Context, email string) (*models.User, error)
+	GetUserbyID(ctx context.Context, ID string) (*models.User, error)
 }
 
 // UserDatastore holds db information.
@@ -20,16 +22,21 @@ type UserDatastore struct {
 	*DB
 }
 
-// CreateNewUser creates a new user with given username and password.
-func (db *UserDatastore) CreateNewUser(ctx context.Context, data *models.User) (*models.User, error) {
-	hash, _ := hashPassword(data.Password)
-	user := &models.User{
-		ID:       ksuid.New().String(),
-		Username: data.Username,
-		Password: hash,
+// CreateNewUser creates a new user with given user details.
+func (db *UserDatastore) CreateNewUser(ctx context.Context, user *models.User) (*models.User, error) {
+	emailUsed, err := models.Users(models.UserWhere.Email.EQ(user.Email)).Exists(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	if emailUsed {
+		return nil, errors.New("email has already been used")
 	}
 
-	if err := user.Insert(ctx, db, boil.Infer()); err != nil {
+	hash, _ := hashPassword(user.Password)
+	user.ID = ksuid.New().String()
+	user.Password = hash
+
+	if err = user.Insert(ctx, db, boil.Infer()); err != nil {
 		return nil, err
 	}
 
@@ -41,7 +48,12 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-// GetUser returns user by given username.
-func (db *UserDatastore) GetUser(ctx context.Context, username string) (*models.User, error) {
-	return models.Users(models.UserWhere.Username.EQ(username)).One(ctx, db)
+// GetUser returns user by given email.
+func (db *UserDatastore) GetUser(ctx context.Context, email string) (*models.User, error) {
+	return models.Users(models.UserWhere.Email.EQ(email)).One(ctx, db)
+}
+
+// GetUserbyID returns user by given user id.
+func (db *UserDatastore) GetUserbyID(ctx context.Context, ID string) (*models.User, error) {
+	return models.Users(models.UserWhere.ID.EQ(ID)).One(ctx, db)
 }

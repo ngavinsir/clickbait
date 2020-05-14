@@ -53,7 +53,7 @@ func testInsertArticle(testRepository *testRepository) func(t *testing.T) {
 func testGetRandomArticle(testRepository *testRepository, articleID string) func(t *testing.T) {
 	return func(t *testing.T) {
 		user, err := testRepository.CreateNewUser(context.Background(), &models.User{
-			Username: "a",
+			Email: "a",
 			Password: "b",
 		})
 		if err != nil {

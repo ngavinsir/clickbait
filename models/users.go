@@ -24,8 +24,11 @@ import (
 // User is an object representing the database table.
 type User struct {
 	ID       string `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Username string `boil:"username" json:"username" toml:"username" yaml:"username"`
+	Email    string `boil:"email" json:"email" toml:"email" yaml:"email"`
 	Password string `boil:"password" json:"password" toml:"password" yaml:"password"`
+	Name     string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	IsMale   bool   `boil:"is_male" json:"is_male" toml:"is_male" yaml:"is_male"`
+	Age      int16  `boil:"age" json:"age" toml:"age" yaml:"age"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -33,24 +36,54 @@ type User struct {
 
 var UserColumns = struct {
 	ID       string
-	Username string
+	Email    string
 	Password string
+	Name     string
+	IsMale   string
+	Age      string
 }{
 	ID:       "id",
-	Username: "username",
+	Email:    "email",
 	Password: "password",
+	Name:     "name",
+	IsMale:   "is_male",
+	Age:      "age",
 }
 
 // Generated where
 
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
+type whereHelperint16 struct{ field string }
+
+func (w whereHelperint16) EQ(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint16) NEQ(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint16) LT(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint16) LTE(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint16) GT(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint16) GTE(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
 var UserWhere = struct {
 	ID       whereHelperstring
-	Username whereHelperstring
+	Email    whereHelperstring
 	Password whereHelperstring
+	Name     whereHelperstring
+	IsMale   whereHelperbool
+	Age      whereHelperint16
 }{
 	ID:       whereHelperstring{field: "\"users\".\"id\""},
-	Username: whereHelperstring{field: "\"users\".\"username\""},
+	Email:    whereHelperstring{field: "\"users\".\"email\""},
 	Password: whereHelperstring{field: "\"users\".\"password\""},
+	Name:     whereHelperstring{field: "\"users\".\"name\""},
+	IsMale:   whereHelperbool{field: "\"users\".\"is_male\""},
+	Age:      whereHelperint16{field: "\"users\".\"age\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -74,8 +107,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "username", "password"}
-	userColumnsWithoutDefault = []string{"id", "username", "password"}
+	userAllColumns            = []string{"id", "email", "password", "name", "is_male", "age"}
+	userColumnsWithoutDefault = []string{"id", "email", "password", "name", "is_male", "age"}
 	userColumnsWithDefault    = []string{}
 	userPrimaryKeyColumns     = []string{"id"}
 )

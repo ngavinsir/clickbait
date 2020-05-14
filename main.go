@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	_ "github.com/lib/pq"
 	"github.com/ngavinsir/clickbait/handlers"
@@ -35,6 +36,9 @@ func main() {
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 	})
 	router.Use(c.Handler)
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
 
 	router.Post("/register", env.Register)
 	router.Post("/login", env.Login)

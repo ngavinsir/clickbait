@@ -17,8 +17,8 @@ import (
 var jwtAuth = jwtauth.New("HS256", []byte("clickbait^secret"), nil)
 var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-// UserIDCtxKey to extract user id from context
-var UserIDCtxKey = &contextKey{"User_id"}
+// UserCtxKey to extract user from context
+var UserCtxKey = &contextKey{"User"}
 
 // Register new user handler
 func (env *Env) Register(w http.ResponseWriter, r *http.Request) {
@@ -89,27 +89,41 @@ func checkPasswordHash(password, hash string) bool {
 }
 
 // AuthMiddleware to handle request jwt token
-func AuthMiddleware(next http.Handler) http.Handler {
-	return jwtauth.Verifier(jwtAuth)(extractUserID(next))
+func (env *Env) AuthMiddleware(next http.Handler) http.Handler {
+	return jwtauth.Verifier(jwtAuth)(extractUser(env.userRepository)(next))
 }
 
-func extractUserID(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, claims, err := jwtauth.FromContext(r.Context())
+func extractUser(repo model.UserRepository) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token, claims, err := jwtauth.FromContext(r.Context())
 
-		if err != nil {
-			http.Error(w, http.StatusText(401), 401)
-			return
-		}
+			if err != nil {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
 
-		if token == nil || !token.Valid {
-			http.Error(w, http.StatusText(401), 401)
-			return
-		}
+			if token == nil || !token.Valid {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
 
-		ctx := context.WithValue(r.Context(), UserIDCtxKey, claims["user_id"])
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+			userID := claims["user_id"].(string)
+			if userID == "" {
+				render.Render(w, r, ErrRender(errors.New("invalid user id")))
+				return
+			}
+
+			user, err := repo.GetUserbyID(r.Context(), userID)
+			if err != nil {
+				render.Render(w, r, ErrRender(errors.New("invalid user")))
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), UserCtxKey, user)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
 // RegisterRequest struct

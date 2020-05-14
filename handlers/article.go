@@ -11,10 +11,10 @@ import (
 
 // RandomArticle handler
 func (env *Env) RandomArticle(w http.ResponseWriter, r *http.Request) {
-	userID, _ := r.Context().Value(UserIDCtxKey).(string)
+	user, _ := r.Context().Value(UserCtxKey).(*models.User)
 	labelType := chi.URLParam(r, "labelType")
 
-	article, err := env.articleRepository.GetRandomArticle(r.Context(), userID, labelType)
+	article, err := env.articleRepository.GetRandomArticle(r.Context(), user.ID, labelType)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
 		return

@@ -12,7 +12,7 @@ import (
 
 // AddLabel handler
 func (env *Env) AddLabel(w http.ResponseWriter, r *http.Request) {
-	userID, _ := r.Context().Value(UserIDCtxKey).(string)
+	user, _ := r.Context().Value(UserCtxKey).(*models.User)
 	labelType := chi.URLParam(r, "labelType")
 
 	data := &LabelRequest{}
@@ -21,7 +21,7 @@ func (env *Env) AddLabel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	label, err := env.labelRepository.InsertLabel(r.Context(), userID, data.ArticleID, data.Value, labelType)
+	label, err := env.labelRepository.InsertLabel(r.Context(), user.ID, data.ArticleID, data.Value, labelType)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
@@ -46,11 +46,11 @@ func (env *Env) DeleteLabel(w http.ResponseWriter, r *http.Request) {
 
 // GetAllLabel handler
 func (env *Env) GetAllLabel(w http.ResponseWriter, r *http.Request) {
-	userID, _ := r.Context().Value(UserIDCtxKey).(string)
+	user, _ := r.Context().Value(UserCtxKey).(*models.User)
 	labelType := chi.URLParam(r, "labelType")
 
 	labels := []*model.ArticleLabel{}
-	labels, err := env.labelRepository.GetArticleLabel(r.Context(), userID, labelType)
+	labels, err := env.labelRepository.GetArticleLabel(r.Context(), user.ID, labelType)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
@@ -61,7 +61,7 @@ func (env *Env) GetAllLabel(w http.ResponseWriter, r *http.Request) {
 
 // Labeling handler return new headline after labeled previous headline
 func (env *Env) Labeling(w http.ResponseWriter, r *http.Request) {
-	userID, _ := r.Context().Value(UserIDCtxKey).(string)
+	user, _ := r.Context().Value(UserCtxKey).(*models.User)
 	labelType := chi.URLParam(r, "labelType")
 
 	data := &LabelRequest{}
@@ -71,14 +71,14 @@ func (env *Env) Labeling(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := &ClickbaitResponse{}
-	label, err := env.labelRepository.InsertLabel(r.Context(), userID, data.ArticleID, data.Value, labelType)
+	label, err := env.labelRepository.InsertLabel(r.Context(), user.ID, data.ArticleID, data.Value, labelType)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
 	response.LabelID = label.ID
 
-	article, _ := env.articleRepository.GetRandomArticle(r.Context(), userID, labelType)
+	article, _ := env.articleRepository.GetRandomArticle(r.Context(), user.ID, labelType)
 	response.Article = article
 
 	render.JSON(w, r, response)

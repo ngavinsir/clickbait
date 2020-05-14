@@ -13,6 +13,7 @@ import (
 type UserRepository interface {
 	CreateNewUser(ctx context.Context, data *models.User) (*models.User, error)
 	GetUser(ctx context.Context, email string) (*models.User, error)
+	GetUserbyID(ctx context.Context, ID string) (*models.User, error)
 }
 
 // UserDatastore holds db information.
@@ -41,4 +42,9 @@ func hashPassword(password string) (string, error) {
 // GetUser returns user by given email.
 func (db *UserDatastore) GetUser(ctx context.Context, email string) (*models.User, error) {
 	return models.Users(models.UserWhere.Email.EQ(email)).One(ctx, db)
+}
+
+// GetUserbyID returns user by given user id.
+func (db *UserDatastore) GetUserbyID(ctx context.Context, ID string) (*models.User, error) {
+	return models.Users(models.UserWhere.ID.EQ(ID)).One(ctx, db)
 }

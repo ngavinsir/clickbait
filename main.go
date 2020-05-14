@@ -40,7 +40,7 @@ func main() {
 	router.Post("/login", env.Login)
 
 	router.Group(func(router chi.Router) {
-		router.Use(handlers.AuthMiddleware)
+		router.Use(env.AuthMiddleware)
 
 		router.Route("/{labelType}", func(router chi.Router) {
 			router.Route("/article", func(router chi.Router) {

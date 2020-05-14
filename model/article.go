@@ -61,7 +61,7 @@ func (db *ArticleDatastore) GetRandomArticle(ctx context.Context, userID string,
 		)
 		group by a.id
 		having count(l.id) < $3
-		order by random()
+		order by count(l.id) desc, random()
 		limit 1
 	`, labelType, userID, 3).Bind(ctx, db, article)
 

@@ -21,13 +21,10 @@ type UserDatastore struct {
 }
 
 // CreateNewUser creates a new user with given username and password.
-func (db *UserDatastore) CreateNewUser(ctx context.Context, data *models.User) (*models.User, error) {
-	hash, _ := hashPassword(data.Password)
-	user := &models.User{
-		ID:       ksuid.New().String(),
-		Username: data.Username,
-		Password: hash,
-	}
+func (db *UserDatastore) CreateNewUser(ctx context.Context, user *models.User) (*models.User, error) {
+	hash, _ := hashPassword(user.Password)
+	user.ID = ksuid.New().String()
+	user.Password = hash
 
 	if err := user.Insert(ctx, db, boil.Infer()); err != nil {
 		return nil, err
@@ -41,7 +38,7 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-// GetUser returns user by given username.
-func (db *UserDatastore) GetUser(ctx context.Context, username string) (*models.User, error) {
-	return models.Users(models.UserWhere.Username.EQ(username)).One(ctx, db)
+// GetUser returns user by given email.
+func (db *UserDatastore) GetUser(ctx context.Context, email string) (*models.User, error) {
+	return models.Users(models.UserWhere.Email.EQ(email)).One(ctx, db)
 }

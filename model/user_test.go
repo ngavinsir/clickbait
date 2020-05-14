@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	testUsername = "TEST_USERNAME"
+	testEmail 	 = "TEST_EMAIL"
 	testPassword = "TEST_PASSWORD"
 )
 
@@ -30,7 +30,7 @@ func TestUser(t *testing.T) {
 func testCreateUser(userRepository UserRepository) func(t *testing.T) {
 	return func(t *testing.T) {
 		user, err := userRepository.CreateNewUser(context.Background(), &models.User{
-			Username: testUsername,
+			Email: testEmail,
 			Password: testPassword,
 		})
 		if err != nil {
@@ -43,8 +43,8 @@ func testCreateUser(userRepository UserRepository) func(t *testing.T) {
 		if user.Password == testPassword {
 			t.Errorf("Want user password hashed, got %s", user.Password)
 		}
-		if got, want := user.Username, testUsername; got != want {
-			t.Errorf("Want user username %s, got %s", want, got)
+		if got, want := user.Email, testEmail; got != want {
+			t.Errorf("Want user email %s, got %s", want, got)
 		}
 
 		t.Run("Get", testGetUser(userRepository))
@@ -53,13 +53,13 @@ func testCreateUser(userRepository UserRepository) func(t *testing.T) {
 
 func testGetUser(userRepository UserRepository) func(t *testing.T) {
 	return func(t *testing.T) {
-		user, err := userRepository.GetUser(context.Background(), testUsername)
+		user, err := userRepository.GetUser(context.Background(), testEmail)
 		if err != nil {
 			t.Error(err)
 		}
 
-		if got, want := user.Username, testUsername; got != want {
-			t.Errorf("Want user username %s, got %s", want, got)
+		if got, want := user.Email, testEmail; got != want {
+			t.Errorf("Want user email %s, got %s", want, got)
 		}
 	}
 }

@@ -59,7 +59,7 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginLogic(ctx context.Context, userRepository model.UserRepository, data *models.User) (string, error) {
-	user, err := userRepository.GetUser(ctx, data.Username)
+	user, err := userRepository.GetUser(ctx, data.Email)
 	if err != nil {
 		return "", err
 	}
@@ -70,7 +70,7 @@ func loginLogic(ctx context.Context, userRepository model.UserRepository, data *
 
 	_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
 		"user_id":  user.ID,
-		"username": user.Username,
+		"email": user.Email,
 	})
 
 	return tokenString, nil
@@ -110,9 +110,9 @@ type RegisterRequest struct {
 	*models.User
 }
 
-// Bind RegisterRequest (Username, Password) [Required]
+// Bind RegisterRequest (Email, Password, Age, Name) [Required]
 func (req *RegisterRequest) Bind(r *http.Request) error {
-	if req.Username == "" || req.Password == "" {
+	if req.Email == "" || req.Password == "" || req.Age <= 0 || req.Name == "" {
 		return errors.New(ErrMissingReqFields)
 	}
 
@@ -124,9 +124,9 @@ type LoginRequest struct {
 	*models.User
 }
 
-// Bind LoginRequest (Username, Password) [Required]
+// Bind LoginRequest (Email, Password) [Required]
 func (req *LoginRequest) Bind(r *http.Request) error {
-	if req.Username == "" || req.Password == "" {
+	if req.Email == "" || req.Password == "" {
 		return errors.New(ErrMissingReqFields)
 	}
 

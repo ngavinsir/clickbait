@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ngavinsir/clickbait/models"
 	"github.com/segmentio/ksuid"
@@ -23,11 +24,19 @@ type UserDatastore struct {
 
 // CreateNewUser creates a new user with given user details.
 func (db *UserDatastore) CreateNewUser(ctx context.Context, user *models.User) (*models.User, error) {
+	emailUsed, err := models.Users(models.UserWhere.Email.EQ(user.Email)).Exists(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	if emailUsed {
+		return nil, errors.New("email has already been used")
+	}
+
 	hash, _ := hashPassword(user.Password)
 	user.ID = ksuid.New().String()
 	user.Password = hash
 
-	if err := user.Insert(ctx, db, boil.Infer()); err != nil {
+	if err = user.Insert(ctx, db, boil.Infer()); err != nil {
 		return nil, err
 	}
 

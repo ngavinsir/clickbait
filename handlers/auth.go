@@ -4,21 +4,33 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"regexp"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
+	"github.com/joho/godotenv"
 	"github.com/ngavinsir/clickbait/model"
 	"github.com/ngavinsir/clickbait/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtAuth = jwtauth.New("HS256", []byte("clickbait^secret"), nil)
+var jwtAuth *jwtauth.JWTAuth
 var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // UserCtxKey to extract user from context
 var UserCtxKey = &contextKey{"User"}
+
+func init() {
+	godotenv.Load()
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		panic(errors.New("env JWT_SECRET not provided"))
+	}
+	jwtAuth = jwtauth.New("HS256", []byte(jwtSecret), nil)
+}
 
 // Register new user handler
 func (env *Env) Register(w http.ResponseWriter, r *http.Request) {

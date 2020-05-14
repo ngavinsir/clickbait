@@ -80,6 +80,7 @@ func loginLogic(ctx context.Context, userRepository model.UserRepository, data *
 	_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
 		"user_id":  user.ID,
 		"email": user.Email,
+		"name": user.Name,
 	})
 
 	return tokenString, nil

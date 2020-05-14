@@ -17,6 +17,7 @@ func TestLabel(t *testing.T) {
 		ResetTestDB(db)
 		db.Close()
 	}()
+	ResetTestDB(db)
 
 	testRepository := initTestRepository(db)
 
@@ -122,7 +123,7 @@ func testGetLabelCount(testRepository *testRepository, articleID string) func(t 
 		if err != nil {
 			t.Error(err)
 		}
-		
+
 		if got, want := labelCount, int64(0); got != want {
 			t.Errorf("Want get label count %d, got %d", want, labelCount)
 		}

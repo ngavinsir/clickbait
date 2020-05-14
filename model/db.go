@@ -54,7 +54,7 @@ func execSchema(db *sql.DB, path string) error {
 	if err != nil {
 		return err
 	}
-    m, err := migrate.NewWithDatabaseInstance(
+	m, err := migrate.NewWithDatabaseInstance(
 		path,
 		"postgres",
 		driver,
@@ -64,6 +64,6 @@ func execSchema(db *sql.DB, path string) error {
 	}
 
 	m.Up()
-	
+
 	return nil
 }

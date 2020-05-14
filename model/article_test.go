@@ -22,6 +22,7 @@ func TestArticle(t *testing.T) {
 		ResetTestDB(db)
 		db.Close()
 	}()
+	ResetTestDB(db)
 
 	testRepository := initTestRepository(db)
 

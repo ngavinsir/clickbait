@@ -22,6 +22,7 @@ func TestUser(t *testing.T) {
 		ResetTestDB(db)
 		db.Close()
 	}()
+	ResetTestDB(db)
 
 	t.Run("Create", testCreateUser(&UserDatastore{DB: db}))
 }

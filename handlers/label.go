@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -34,7 +33,7 @@ func (env *Env) AddLabel(w http.ResponseWriter, r *http.Request) {
 func (env *Env) DeleteLabel(w http.ResponseWriter, r *http.Request) {
 	labelID := chi.URLParam(r, "labelID")
 	if labelID == "" {
-		render.Render(w, r, ErrRender(errors.New(ErrMissingReqFields)))
+		render.Render(w, r, ErrRender(ErrMissingReqFields))
 	}
 
 	err := env.labelRepository.DeleteLabel(r.Context(), labelID)
@@ -92,7 +91,7 @@ type LabelRequest struct {
 // Bind label request if value and headline_id are present
 func (req *LabelRequest) Bind(r *http.Request) error {
 	if req.Label == nil || req.Value == "" || req.ArticleID == "" {
-		return errors.New(ErrMissingReqFields)
+		return ErrMissingReqFields
 	}
 
 	return nil

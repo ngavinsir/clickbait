@@ -55,7 +55,7 @@ func (env *Env) Register(w http.ResponseWriter, r *http.Request) {
 	data.User.Password = password
 	tokenString, err := loginLogic(r.Context(), env.userRepository, data.User)
 	if err != nil {
-		render.Render(w, r, ErrRender(err))
+		render.Render(w, r, ErrUnauthorized(err))
 		return
 	}
 
@@ -72,7 +72,7 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 
 	tokenString, err := loginLogic(r.Context(), env.userRepository, data.User)
 	if err != nil {
-		render.Render(w, r, ErrRender(err))
+		render.Render(w, r, ErrUnauthorized(err))
 		return
 	}
 
@@ -82,11 +82,11 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 func loginLogic(ctx context.Context, userRepository model.UserRepository, data *models.User) (string, error) {
 	user, err := userRepository.GetUser(ctx, data.Email)
 	if err != nil {
-		return "", err
+		return "", ErrInvalidAccount
 	}
 
 	if !checkPasswordHash(data.Password, user.Password) {
-		return "", errors.New("invalid password")
+		return "", ErrInvalidAccount
 	}
 
 	_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
@@ -149,7 +149,7 @@ type RegisterRequest struct {
 // Bind RegisterRequest (Email, Password, Age, Name) [Required]
 func (req *RegisterRequest) Bind(r *http.Request) error {
 	if req.Email == "" || req.Password == "" || req.Age <= 0 || req.Name == "" {
-		return errors.New(ErrMissingReqFields)
+		return ErrMissingReqFields
 	}
 
 	return nil
@@ -163,7 +163,7 @@ type LoginRequest struct {
 // Bind LoginRequest (Email, Password) [Required]
 func (req *LoginRequest) Bind(r *http.Request) error {
 	if req.Email == "" || req.Password == "" {
-		return errors.New(ErrMissingReqFields)
+		return ErrMissingReqFields
 	}
 
 	return nil

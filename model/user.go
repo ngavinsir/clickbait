@@ -12,7 +12,7 @@ import (
 // UserRepository handles user data management.
 type UserRepository interface {
 	CreateNewUser(ctx context.Context, data *models.User) (*models.User, error)
-	GetUser(ctx context.Context, username string) (*models.User, error)
+	GetUser(ctx context.Context, email string) (*models.User, error)
 }
 
 // UserDatastore holds db information.
@@ -20,7 +20,7 @@ type UserDatastore struct {
 	*DB
 }
 
-// CreateNewUser creates a new user with given username and password.
+// CreateNewUser creates a new user with given user details.
 func (db *UserDatastore) CreateNewUser(ctx context.Context, user *models.User) (*models.User, error) {
 	hash, _ := hashPassword(user.Password)
 	user.ID = ksuid.New().String()

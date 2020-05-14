@@ -33,12 +33,14 @@ func (env *Env) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	password := data.User.Password
 	_, err := env.userRepository.CreateNewUser(r.Context(), data.User)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
 
+	data.User.Password = password
 	tokenString, err := loginLogic(r.Context(), env.userRepository, data.User)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))

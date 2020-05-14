@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -48,7 +47,7 @@ type AddArticleRequest struct {
 // Bind add headline request if headline_value is not missing
 func (req *AddArticleRequest) Bind(r *http.Request) error {
 	if req.Article == nil || req.Headline == "" || req.Content == "" {
-		return errors.New(ErrMissingReqFields)
+		return ErrMissingReqFields
 	}
 
 	return nil

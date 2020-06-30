@@ -14,4 +14,4 @@ WORKDIR /root/
 COPY --from=builder /src/app .
 COPY --from=builder /src/migrations ./migrations
 
-CMD ["./app"]
+CMD ["./app server"]

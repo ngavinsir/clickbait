@@ -30,7 +30,14 @@ func (env *Env) AddArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	article, err := env.articleRepository.InsertArticle(r.Context(), data.Headline, data.Content)
+	article, err := env.articleRepository.InsertArticle(
+		r.Context(),
+		data.Headline,
+		data.URL,
+		data.Date,
+		data.Source,
+		data.Content,
+	)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
 		return

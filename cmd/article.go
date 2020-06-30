@@ -31,7 +31,7 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 
 func (wc WriteCounter) printProgress() {
 	fmt.Printf("\r%s", strings.Repeat(" ", 35))
-	fmt.Printf("\rDownloading... %s complete", humanize.Bytes(wc.Total))
+	fmt.Printf("\rDownloading... %s/%s complete", humanize.Bytes(wc.Total), humanize.Bytes(wc.Size))
 }
 
 var cmdArticle = &cobra.Command{

@@ -12,7 +12,7 @@ import (
 
 // ArticleRepository handles article data management.
 type ArticleRepository interface {
-	InsertArticle(ctx context.Context, headline string, content string) (*models.Article, error)
+	InsertArticle(ctx context.Context, headline, url, date, source, content string) (*models.Article, error)
 	GetRandomArticle(ctx context.Context, userID string, labelType string) (*models.Article, error)
 }
 
@@ -22,11 +22,11 @@ type ArticleDatastore struct {
 }
 
 // InsertArticle with headline and content
-func (db *ArticleDatastore) InsertArticle(ctx context.Context, headline string, content string) (*models.Article, error) {
-	return db.insertArticleWithID(ctx, ksuid.New().String(), headline, content)
+func (db *ArticleDatastore) InsertArticle(ctx context.Context, headline, url, date, source, content string) (*models.Article, error) {
+	return db.insertArticleWithID(ctx, ksuid.New().String(), headline, url, date, source, content)
 }
 
-func (db *ArticleDatastore) insertArticleWithID(ctx context.Context, id string, headline string, content string) (*models.Article, error) {
+func (db *ArticleDatastore) insertArticleWithID(ctx context.Context, id, headline, url, date, source, content string) (*models.Article, error) {
 	if id == "" {
 		id = ksuid.New().String()
 	}
@@ -35,6 +35,9 @@ func (db *ArticleDatastore) insertArticleWithID(ctx context.Context, id string, 
 		ID:       id,
 		Headline: headline,
 		Content:  content,
+		URL:      url,
+		Date:     date,
+		Source:   source,
 	}
 
 	if err := article.Insert(ctx, db, boil.Infer()); err != nil {

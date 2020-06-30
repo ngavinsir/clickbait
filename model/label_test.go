@@ -22,14 +22,14 @@ func TestLabel(t *testing.T) {
 	testRepository := initTestRepository(db)
 
 	user, err := testRepository.CreateNewUser(context.Background(), &models.User{
-		Email: "a",
+		Email:    "a",
 		Password: "b",
 	})
 	if err != nil {
 		t.Error(err)
 	}
 
-	article, err := testRepository.InsertArticle(context.Background(), "TEST_HEADLINE", "TEST_CONTENT")
+	article, err := testRepository.InsertArticle(context.Background(), "", "", "", "", "")
 	if err != nil {
 		t.Error(err)
 	}

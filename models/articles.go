@@ -26,6 +26,9 @@ type Article struct {
 	ID       string `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Headline string `boil:"headline" json:"headline" toml:"headline" yaml:"headline"`
 	Content  string `boil:"content" json:"content" toml:"content" yaml:"content"`
+	Date     string `boil:"date" json:"date" toml:"date" yaml:"date"`
+	Source   string `boil:"source" json:"source" toml:"source" yaml:"source"`
+	URL      string `boil:"url" json:"url" toml:"url" yaml:"url"`
 
 	R *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L articleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -35,10 +38,16 @@ var ArticleColumns = struct {
 	ID       string
 	Headline string
 	Content  string
+	Date     string
+	Source   string
+	URL      string
 }{
 	ID:       "id",
 	Headline: "headline",
 	Content:  "content",
+	Date:     "date",
+	Source:   "source",
+	URL:      "url",
 }
 
 // Generated where
@@ -63,10 +72,16 @@ var ArticleWhere = struct {
 	ID       whereHelperstring
 	Headline whereHelperstring
 	Content  whereHelperstring
+	Date     whereHelperstring
+	Source   whereHelperstring
+	URL      whereHelperstring
 }{
 	ID:       whereHelperstring{field: "\"articles\".\"id\""},
 	Headline: whereHelperstring{field: "\"articles\".\"headline\""},
 	Content:  whereHelperstring{field: "\"articles\".\"content\""},
+	Date:     whereHelperstring{field: "\"articles\".\"date\""},
+	Source:   whereHelperstring{field: "\"articles\".\"source\""},
+	URL:      whereHelperstring{field: "\"articles\".\"url\""},
 }
 
 // ArticleRels is where relationship names are stored.
@@ -90,8 +105,8 @@ func (*articleR) NewStruct() *articleR {
 type articleL struct{}
 
 var (
-	articleAllColumns            = []string{"id", "headline", "content"}
-	articleColumnsWithoutDefault = []string{"id", "headline", "content"}
+	articleAllColumns            = []string{"id", "headline", "content", "date", "source", "url"}
+	articleColumnsWithoutDefault = []string{"id", "headline", "content", "date", "source", "url"}
 	articleColumnsWithDefault    = []string{}
 	articlePrimaryKeyColumns     = []string{"id"}
 )

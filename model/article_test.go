@@ -10,6 +10,9 @@ import (
 const (
 	testHeadline = "TEST_HEADLINE"
 	testContent  = "TEST_CONTENT"
+	testSource   = "TEST_SOURCE"
+	testURL      = "TEST_URL"
+	testDate     = "TEST_DATE"
 )
 
 func TestArticle(t *testing.T) {
@@ -31,7 +34,7 @@ func TestArticle(t *testing.T) {
 
 func testInsertArticle(testRepository *testRepository) func(t *testing.T) {
 	return func(t *testing.T) {
-		article, err := testRepository.InsertArticle(context.Background(), testHeadline, testContent)
+		article, err := testRepository.InsertArticle(context.Background(), testHeadline, testURL, testDate, testSource, testContent)
 		if err != nil {
 			t.Error(err)
 		}
@@ -53,7 +56,7 @@ func testInsertArticle(testRepository *testRepository) func(t *testing.T) {
 func testGetRandomArticle(testRepository *testRepository, articleID string) func(t *testing.T) {
 	return func(t *testing.T) {
 		user, err := testRepository.CreateNewUser(context.Background(), &models.User{
-			Email: "a",
+			Email:    "a",
 			Password: "b",
 		})
 		if err != nil {

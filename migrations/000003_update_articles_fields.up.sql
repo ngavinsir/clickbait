@@ -1,5 +1,5 @@
 alter table articles
-	add date timestamptz not null;
+	add date text not null;
 
 alter table articles
 	add source text not null;

@@ -23,12 +23,12 @@ import (
 
 // Article is an object representing the database table.
 type Article struct {
-	ID       string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Headline string    `boil:"headline" json:"headline" toml:"headline" yaml:"headline"`
-	Content  string    `boil:"content" json:"content" toml:"content" yaml:"content"`
-	Date     time.Time `boil:"date" json:"date" toml:"date" yaml:"date"`
-	Source   string    `boil:"source" json:"source" toml:"source" yaml:"source"`
-	URL      string    `boil:"url" json:"url" toml:"url" yaml:"url"`
+	ID       string `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Headline string `boil:"headline" json:"headline" toml:"headline" yaml:"headline"`
+	Content  string `boil:"content" json:"content" toml:"content" yaml:"content"`
+	Date     string `boil:"date" json:"date" toml:"date" yaml:"date"`
+	Source   string `boil:"source" json:"source" toml:"source" yaml:"source"`
+	URL      string `boil:"url" json:"url" toml:"url" yaml:"url"`
 
 	R *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L articleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -68,39 +68,18 @@ func (w whereHelperstring) IN(slice []string) qm.QueryMod {
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 
-type whereHelpertime_Time struct{ field string }
-
-func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var ArticleWhere = struct {
 	ID       whereHelperstring
 	Headline whereHelperstring
 	Content  whereHelperstring
-	Date     whereHelpertime_Time
+	Date     whereHelperstring
 	Source   whereHelperstring
 	URL      whereHelperstring
 }{
 	ID:       whereHelperstring{field: "\"articles\".\"id\""},
 	Headline: whereHelperstring{field: "\"articles\".\"headline\""},
 	Content:  whereHelperstring{field: "\"articles\".\"content\""},
-	Date:     whereHelpertime_Time{field: "\"articles\".\"date\""},
+	Date:     whereHelperstring{field: "\"articles\".\"date\""},
 	Source:   whereHelperstring{field: "\"articles\".\"source\""},
 	URL:      whereHelperstring{field: "\"articles\".\"url\""},
 }

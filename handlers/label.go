@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -75,7 +76,18 @@ func (env *Env) Labeling(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
+	if labelType == "clickbait" && data.Value == "Clickbait" && data.Keywords != nil {
+		if err = env.clickbaitKeywordRepository.AddClickbaitKeywords(
+			context.Background(),
+			label.ID,
+			data.Keywords,
+		); err != nil {
+			render.Render(w, r, ErrRender(err))
+			return
+		}
+	}
 	response.LabelID = label.ID
+	response.Keywords = data.Keywords
 
 	article, _ := env.articleRepository.GetRandomArticle(r.Context(), user.ID, labelType)
 	response.Article = article
@@ -86,6 +98,7 @@ func (env *Env) Labeling(w http.ResponseWriter, r *http.Request) {
 // LabelRequest for add label handler request
 type LabelRequest struct {
 	*models.Label
+	Keywords []string `json:"keywords"`
 }
 
 // Bind label request if value and headline_id are present
@@ -99,6 +112,7 @@ func (req *LabelRequest) Bind(r *http.Request) error {
 
 // ClickbaitResponse contains label_id and new_headline
 type ClickbaitResponse struct {
-	LabelID         string `boil:"label_id" json:"label_id"`
+	LabelID         string   `boil:"label_id" json:"label_id"`
+	Keywords        []string `json:"keywords,omitempty"`
 	*models.Article `boil:"new_article" json:"new_article"`
 }

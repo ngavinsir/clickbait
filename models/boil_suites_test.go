@@ -13,66 +13,77 @@ import "testing"
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
 	t.Run("Articles", testArticles)
+	t.Run("ClickbaitKeywords", testClickbaitKeywords)
 	t.Run("Labels", testLabels)
 	t.Run("Users", testUsers)
 }
 
 func TestDelete(t *testing.T) {
 	t.Run("Articles", testArticlesDelete)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsDelete)
 	t.Run("Labels", testLabelsDelete)
 	t.Run("Users", testUsersDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Articles", testArticlesQueryDeleteAll)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsQueryDeleteAll)
 	t.Run("Labels", testLabelsQueryDeleteAll)
 	t.Run("Users", testUsersQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Articles", testArticlesSliceDeleteAll)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsSliceDeleteAll)
 	t.Run("Labels", testLabelsSliceDeleteAll)
 	t.Run("Users", testUsersSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
 	t.Run("Articles", testArticlesExists)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsExists)
 	t.Run("Labels", testLabelsExists)
 	t.Run("Users", testUsersExists)
 }
 
 func TestFind(t *testing.T) {
 	t.Run("Articles", testArticlesFind)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsFind)
 	t.Run("Labels", testLabelsFind)
 	t.Run("Users", testUsersFind)
 }
 
 func TestBind(t *testing.T) {
 	t.Run("Articles", testArticlesBind)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsBind)
 	t.Run("Labels", testLabelsBind)
 	t.Run("Users", testUsersBind)
 }
 
 func TestOne(t *testing.T) {
 	t.Run("Articles", testArticlesOne)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsOne)
 	t.Run("Labels", testLabelsOne)
 	t.Run("Users", testUsersOne)
 }
 
 func TestAll(t *testing.T) {
 	t.Run("Articles", testArticlesAll)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsAll)
 	t.Run("Labels", testLabelsAll)
 	t.Run("Users", testUsersAll)
 }
 
 func TestCount(t *testing.T) {
 	t.Run("Articles", testArticlesCount)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsCount)
 	t.Run("Labels", testLabelsCount)
 	t.Run("Users", testUsersCount)
 }
 
 func TestHooks(t *testing.T) {
 	t.Run("Articles", testArticlesHooks)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsHooks)
 	t.Run("Labels", testLabelsHooks)
 	t.Run("Users", testUsersHooks)
 }
@@ -80,6 +91,8 @@ func TestHooks(t *testing.T) {
 func TestInsert(t *testing.T) {
 	t.Run("Articles", testArticlesInsert)
 	t.Run("Articles", testArticlesInsertWhitelist)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsInsert)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsInsertWhitelist)
 	t.Run("Labels", testLabelsInsert)
 	t.Run("Labels", testLabelsInsertWhitelist)
 	t.Run("Users", testUsersInsert)
@@ -89,6 +102,7 @@ func TestInsert(t *testing.T) {
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
+	t.Run("ClickbaitKeywordToLabelUsingLabel", testClickbaitKeywordToOneLabelUsingLabel)
 	t.Run("LabelToArticleUsingArticle", testLabelToOneArticleUsingArticle)
 	t.Run("LabelToUserUsingUser", testLabelToOneUserUsingUser)
 }
@@ -101,12 +115,14 @@ func TestOneToOne(t *testing.T) {}
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
 	t.Run("ArticleToLabels", testArticleToManyLabels)
+	t.Run("LabelToClickbaitKeywords", testLabelToManyClickbaitKeywords)
 	t.Run("UserToLabels", testUserToManyLabels)
 }
 
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
+	t.Run("ClickbaitKeywordToLabelUsingClickbaitKeywords", testClickbaitKeywordToOneSetOpLabelUsingLabel)
 	t.Run("LabelToArticleUsingLabels", testLabelToOneSetOpArticleUsingArticle)
 	t.Run("LabelToUserUsingLabels", testLabelToOneSetOpUserUsingUser)
 }
@@ -127,6 +143,7 @@ func TestOneToOneRemove(t *testing.T) {}
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
 	t.Run("ArticleToLabels", testArticleToManyAddOpLabels)
+	t.Run("LabelToClickbaitKeywords", testLabelToManyAddOpClickbaitKeywords)
 	t.Run("UserToLabels", testUserToManyAddOpLabels)
 }
 
@@ -140,30 +157,35 @@ func TestToManyRemove(t *testing.T) {}
 
 func TestReload(t *testing.T) {
 	t.Run("Articles", testArticlesReload)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsReload)
 	t.Run("Labels", testLabelsReload)
 	t.Run("Users", testUsersReload)
 }
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Articles", testArticlesReloadAll)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsReloadAll)
 	t.Run("Labels", testLabelsReloadAll)
 	t.Run("Users", testUsersReloadAll)
 }
 
 func TestSelect(t *testing.T) {
 	t.Run("Articles", testArticlesSelect)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsSelect)
 	t.Run("Labels", testLabelsSelect)
 	t.Run("Users", testUsersSelect)
 }
 
 func TestUpdate(t *testing.T) {
 	t.Run("Articles", testArticlesUpdate)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsUpdate)
 	t.Run("Labels", testLabelsUpdate)
 	t.Run("Users", testUsersUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Articles", testArticlesSliceUpdateAll)
+	t.Run("ClickbaitKeywords", testClickbaitKeywordsSliceUpdateAll)
 	t.Run("Labels", testLabelsSliceUpdateAll)
 	t.Run("Users", testUsersSliceUpdateAll)
 }

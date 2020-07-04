@@ -129,6 +129,20 @@ func (env *Env) GetLabelLeaderboard(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, clickbaitLeaderboard)
 }
 
+// GetLabelScore returns user's label score.
+func (env *Env) GetLabelScore(w http.ResponseWriter, r *http.Request) {
+	user, _ := r.Context().Value(UserCtxKey).(*models.User)
+	labelType := chi.URLParam(r, "labelType")
+
+	score, err := env.labelRepository.GetLabelScore(r.Context(), labelType, user.ID)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+
+	render.PlainText(w, r, strconv.Itoa(score))
+}
+
 // LabelRequest for add label handler request
 type LabelRequest struct {
 	*models.Label

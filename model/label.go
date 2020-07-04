@@ -19,6 +19,7 @@ type LabelRepository interface {
 	GetLabel(ctx context.Context, userID string, labelType string) ([]*models.Label, error)
 	GetArticleLabelCount(ctx context.Context, articleID string, labelType string) (int64, error)
 	GetLabelLeaderboard(ctx context.Context, labelType string, limit uint8) (*[]LabelScore, error)
+	GetLabelScore(ctx context.Context, labelType, userID string) (int, error)
 }
 
 // LabelDatastore holds db information.
@@ -129,6 +130,19 @@ func (db *LabelDatastore) GetLabelLeaderboard(ctx context.Context, labelType str
 	}
 
 	return data, nil
+}
+
+// GetLabelScore returns user's label score.
+func (db *LabelDatastore) GetLabelScore(ctx context.Context, labelType, userID string) (int, error) {
+	score, err := models.Labels(
+		models.LabelWhere.Type.EQ(labelType),
+		models.LabelWhere.UserID.EQ(userID),
+	).Count(ctx, db)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(score), nil
 }
 
 // LabelScore holds label leaderboard information.

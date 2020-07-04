@@ -494,6 +494,159 @@ func testLabelsInsertWhitelist(t *testing.T) {
 	}
 }
 
+func testLabelToManyClickbaitKeywords(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Label
+	var b, c ClickbaitKeyword
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, labelDBTypes, true, labelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Label struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, clickbaitKeywordDBTypes, false, clickbaitKeywordColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, clickbaitKeywordDBTypes, false, clickbaitKeywordColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.LabelID = a.ID
+	c.LabelID = a.ID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.ClickbaitKeywords().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.LabelID == b.LabelID {
+			bFound = true
+		}
+		if v.LabelID == c.LabelID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := LabelSlice{&a}
+	if err = a.L.LoadClickbaitKeywords(ctx, tx, false, (*[]*Label)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.ClickbaitKeywords); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.ClickbaitKeywords = nil
+	if err = a.L.LoadClickbaitKeywords(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.ClickbaitKeywords); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
+func testLabelToManyAddOpClickbaitKeywords(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Label
+	var b, c, d, e ClickbaitKeyword
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, labelDBTypes, false, strmangle.SetComplement(labelPrimaryKeyColumns, labelColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*ClickbaitKeyword{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, clickbaitKeywordDBTypes, false, strmangle.SetComplement(clickbaitKeywordPrimaryKeyColumns, clickbaitKeywordColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*ClickbaitKeyword{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddClickbaitKeywords(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if a.ID != first.LabelID {
+			t.Error("foreign key was wrong value", a.ID, first.LabelID)
+		}
+		if a.ID != second.LabelID {
+			t.Error("foreign key was wrong value", a.ID, second.LabelID)
+		}
+
+		if first.R.Label != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.Label != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.ClickbaitKeywords[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.ClickbaitKeywords[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.ClickbaitKeywords().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
 func testLabelToOneArticleUsingArticle(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))

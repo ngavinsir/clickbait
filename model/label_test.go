@@ -82,28 +82,28 @@ func testIsLabeled(testRepository *testRepository, userID string, articleID stri
 
 func testGetLabel(testRepository *testRepository, userID string, articleID string, labelID string) func(t *testing.T) {
 	return func(t *testing.T) {
-		articleLabel, err := testRepository.GetArticleLabel(context.Background(), userID, "clickbait")
+		labels, err := testRepository.GetLabel(context.Background(), userID, "clickbait")
 		if err != nil {
 			t.Error(err)
 		}
 
-		if got, want := len(articleLabel), 1; got != want {
+		if got, want := len(labels), 1; got != want {
 			t.Errorf("Want get label count %d, got %d", want, got)
 		}
-		if got, want := articleLabel[0].Label.ID, labelID; got != want {
+		if got, want := labels[0].ID, labelID; got != want {
 			t.Errorf("Want label id %s, got %s", want, got)
 		}
-		if got, want := articleLabel[0].Article.ID, articleID; got != want {
+		if got, want := labels[0].R.Article.ID, articleID; got != want {
 			t.Errorf("Want article id %s, got %s", want, got)
 		}
 
-		articleLabel, err = testRepository.GetArticleLabel(context.Background(), userID, "summary")
+		labels, err = testRepository.GetLabel(context.Background(), userID, "summary")
 		if err != nil {
 			t.Error(err)
 		}
 
-		if got, want := len(articleLabel), 0; got != want {
-			t.Errorf("Want get label return nothing, got %+v", articleLabel)
+		if got, want := len(labels), 0; got != want {
+			t.Errorf("Want get label return nothing, got %+v", labels)
 		}
 	}
 }

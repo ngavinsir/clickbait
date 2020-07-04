@@ -7,6 +7,7 @@ import (
 	"github.com/ngavinsir/clickbait/models"
 	"github.com/segmentio/ksuid"
 	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/volatiletech/sqlboiler/queries"
 	. "github.com/volatiletech/sqlboiler/queries/qm"
 )
 
@@ -17,6 +18,7 @@ type LabelRepository interface {
 	DeleteLabel(ctx context.Context, labelID string) error
 	GetLabel(ctx context.Context, userID string, labelType string) ([]*models.Label, error)
 	GetArticleLabelCount(ctx context.Context, articleID string, labelType string) (int64, error)
+	GetLabelLeaderboard(ctx context.Context, labelType string, limit uint8) (*[]LabelScore, error)
 }
 
 // LabelDatastore holds db information.
@@ -109,4 +111,28 @@ func (db *LabelDatastore) GetArticleLabelCount(ctx context.Context, articleID st
 	}
 
 	return labelCount, nil
+}
+
+// GetLabelLeaderboard returns top labeling score.
+func (db *LabelDatastore) GetLabelLeaderboard(ctx context.Context, labelType string, limit uint8) (*[]LabelScore, error) {
+	data := &[]LabelScore{}
+	if err := queries.Raw(`
+		select u.name, count(l.id) as score
+		from labels as l
+		inner join users u on l.user_id = u.id
+		where l.type = $1
+		group by u.name
+		order by count(l.id) desc
+		limit $2;
+	`, labelType, limit).Bind(ctx, db, data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+// LabelScore holds label leaderboard information.
+type LabelScore struct {
+	Name  string `json:"name"`
+	Score uint32 `json:"score"`
 }

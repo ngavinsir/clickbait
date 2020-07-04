@@ -8,9 +8,10 @@ import (
 )
 
 type testRepository struct {
-	UserRepository
-	LabelRepository
-	ArticleRepository
+	*UserDatastore
+	*LabelDatastore
+	*ArticleDatastore
+	*CLickbaitKeywordDatastore
 }
 
 // ConnectTestDB connects to test db.
@@ -36,8 +37,9 @@ func ResetTestDB(db *DB) error {
 
 func initTestRepository(db *DB) *testRepository {
 	return &testRepository{
-		UserRepository:    &UserDatastore{DB: db},
-		ArticleRepository: &ArticleDatastore{DB: db},
-		LabelRepository:   &LabelDatastore{DB: db},
+		UserDatastore:             &UserDatastore{DB: db},
+		ArticleDatastore:          &ArticleDatastore{DB: db},
+		LabelDatastore:            &LabelDatastore{DB: db},
+		CLickbaitKeywordDatastore: &CLickbaitKeywordDatastore{DB: db},
 	}
 }

@@ -58,6 +58,7 @@ var cmdServer = &cobra.Command{
 				})
 
 				router.Post("/labeling", env.Labeling)
+				router.Get("/leaderboard/{limit}", env.GetLabelLeaderboard)
 			})
 
 			router.Post("/article", env.AddArticle)

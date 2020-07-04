@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"github.com/ngavinsir/clickbait/model"
 	"github.com/ngavinsir/clickbait/models"
 )
 
@@ -49,14 +48,26 @@ func (env *Env) GetAllLabel(w http.ResponseWriter, r *http.Request) {
 	user, _ := r.Context().Value(UserCtxKey).(*models.User)
 	labelType := chi.URLParam(r, "labelType")
 
-	labels := []*model.ArticleLabel{}
-	labels, err := env.labelRepository.GetArticleLabel(r.Context(), user.ID, labelType)
+	labels, err := env.labelRepository.GetLabel(r.Context(), user.ID, labelType)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
 
-	render.JSON(w, r, labels)
+	var labelResponse []*LabelResponse
+	for _, label := range labels {
+		var keywords []string
+		for _, keyword := range label.R.ClickbaitKeywords {
+			keywords = append(keywords, keyword.Keyword)
+		}
+		labelResponse = append(labelResponse, &LabelResponse{
+			Label:    label,
+			Article:  label.R.Article,
+			Keywords: keywords,
+		})
+	}
+
+	render.JSON(w, r, labelResponse)
 }
 
 // Labeling handler return new headline after labeled previous headline
@@ -115,4 +126,11 @@ type ClickbaitResponse struct {
 	LabelID         string   `boil:"label_id" json:"label_id"`
 	Keywords        []string `json:"keywords,omitempty"`
 	*models.Article `boil:"new_article" json:"new_article"`
+}
+
+// LabelResponse contains label, keywords and article
+type LabelResponse struct {
+	*models.Label   `json:"label"`
+	*models.Article `json:"article"`
+	Keywords        []string `json:"keywords,omitempty"`
 }

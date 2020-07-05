@@ -40,6 +40,7 @@ var cmdServer = &cobra.Command{
 
 		router.Post("/register", env.Register)
 		router.Post("/login", env.Login)
+		router.Get("/{labelType}/label/leaderboard/{limit}", env.GetLabelLeaderboard)
 
 		router.Group(func(router chi.Router) {
 			router.Use(env.AuthMiddleware)
@@ -55,7 +56,6 @@ var cmdServer = &cobra.Command{
 					router.Route("/{labelID}", func(router chi.Router) {
 						router.Delete("/", env.DeleteLabel)
 					})
-					router.Get("/leaderboard/{limit}", env.GetLabelLeaderboard)
 					router.Get("/score", env.GetLabelScore)
 				})
 

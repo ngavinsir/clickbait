@@ -55,6 +55,8 @@ var cmdServer = &cobra.Command{
 					router.Route("/{labelID}", func(router chi.Router) {
 						router.Delete("/", env.DeleteLabel)
 					})
+					router.Get("/leaderboard/{limit}", env.GetLabelLeaderboard)
+					router.Get("/score", env.GetLabelScore)
 				})
 
 				router.Post("/labeling", env.Labeling)

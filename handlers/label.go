@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -104,6 +105,42 @@ func (env *Env) Labeling(w http.ResponseWriter, r *http.Request) {
 	response.Article = article
 
 	render.JSON(w, r, response)
+}
+
+// GetLabelLeaderboard returns labeler score leaderboard.
+func (env *Env) GetLabelLeaderboard(w http.ResponseWriter, r *http.Request) {
+	labelType := chi.URLParam(r, "labelType")
+	limit := chi.URLParam(r, "limit")
+	limitU64, err := strconv.ParseUint(limit, 10, 32)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+	if limitU64 < 0 {
+		limitU64 = 0
+	}
+
+	clickbaitLeaderboard, err := env.labelRepository.GetLabelLeaderboard(r.Context(), labelType, uint8(limitU64))
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+
+	render.JSON(w, r, clickbaitLeaderboard)
+}
+
+// GetLabelScore returns user's label score.
+func (env *Env) GetLabelScore(w http.ResponseWriter, r *http.Request) {
+	user, _ := r.Context().Value(UserCtxKey).(*models.User)
+	labelType := chi.URLParam(r, "labelType")
+
+	score, err := env.labelRepository.GetLabelScore(r.Context(), labelType, user.ID)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+
+	render.PlainText(w, r, strconv.Itoa(score))
 }
 
 // LabelRequest for add label handler request

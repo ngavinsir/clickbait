@@ -39,8 +39,8 @@ func Connect(conn string, path string) (*DB, error) {
 		return nil, err
 	}
 
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(25)
+	db.SetMaxOpenConns(15)
+	db.SetMaxIdleConns(15)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
 	return &DB{db}, nil

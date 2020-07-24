@@ -90,9 +90,9 @@ func loginLogic(ctx context.Context, userRepository model.UserRepository, data *
 	}
 
 	_, tokenString, _ := jwtAuth.Encode(jwt.MapClaims{
-		"user_id":  user.ID,
-		"email": user.Email,
-		"name": user.Name,
+		"user_id": user.ID,
+		"email":   user.Email,
+		"name":    user.Name,
 	})
 
 	return tokenString, nil
@@ -114,12 +114,12 @@ func extractUser(repo model.UserRepository) func(http.Handler) http.Handler {
 			token, claims, err := jwtauth.FromContext(r.Context())
 
 			if err != nil {
-				http.Error(w, http.StatusText(401), 401)
+				render.Render(w, r, ErrUnauthorized(err))
 				return
 			}
 
-			if token == nil || !token.Valid {
-				http.Error(w, http.StatusText(401), 401)
+			if token == nil || !token.Valid || claims["user_id"] == nil {
+				render.Render(w, r, ErrUnauthorized(errors.New("token is invalid")))
 				return
 			}
 

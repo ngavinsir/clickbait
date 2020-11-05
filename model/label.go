@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/ngavinsir/clickbait/models"
 	"github.com/segmentio/ksuid"
@@ -20,6 +21,13 @@ type LabelRepository interface {
 	GetArticleLabelCount(ctx context.Context, articleID string, labelType string) (int64, error)
 	GetLabelLeaderboard(ctx context.Context, labelType string, limit uint8) (*[]LabelScore, error)
 	GetLabelScore(ctx context.Context, labelType, userID string) (int, error)
+	GetLabelProgress(ctx context.Context, labelType string, startWeek time.Time, duration int) ([][]*LabelProgress, error)
+}
+
+// LabelProgress tracks each user labeling progress
+type LabelProgress struct {
+	Name     string `json:"name"`
+	Progress int64	`json:"progress"`
 }
 
 // LabelDatastore holds db information.
@@ -143,6 +151,52 @@ func (db *LabelDatastore) GetLabelScore(ctx context.Context, labelType, userID s
 	}
 
 	return int(score), nil
+}
+
+// GetLabelProgress returns user's labeling progress
+func (db *LabelDatastore) GetLabelProgress(
+	ctx context.Context, labelType string, startWeek time.Time, duration int,
+) ([][]*LabelProgress, error) {
+
+	type LabelProgressWeek struct {
+		Name     string    `json:"name"`
+		Progress int64     `json:"progress"`
+		Week     time.Time `json:"week"`
+	}
+
+	startWeek = startWeek.Truncate(7 * 24 * time.Hour).UTC()
+	endWeek := startWeek.Add(time.Duration(duration-1) * 7 * 24 * time.Hour)
+
+	labelProgressWeeks := &[]LabelProgressWeek{}
+	if err := queries.Raw(`
+		with weeks as (
+			select generate_series($1::timestamp, $2::timestamp, '7 days') week
+		)
+		select w.week week, u.name, count(l.id) progress
+		from weeks w
+			cross join users u
+			left join labels l on date_trunc('week', l.created_at) = w.week and l.user_id = u.id
+		group by week, u.name
+		order by week;
+	`, startWeek.Format(time.RFC3339), endWeek.Format(time.RFC3339)).Bind(ctx, db, labelProgressWeeks); err != nil {
+		return nil, err
+	}
+
+	result := make([][]*LabelProgress, duration)
+	currentWeek := (*labelProgressWeeks)[0].Week
+	currentIndex := 0
+	for _, labelProgressWeek := range *labelProgressWeeks {
+		if labelProgressWeek.Week != currentWeek {
+			currentIndex++
+			currentWeek = labelProgressWeek.Week
+		}
+		result[currentIndex] = append(result[currentIndex], &LabelProgress{
+			Name:     labelProgressWeek.Name,
+			Progress: labelProgressWeek.Progress,
+		})
+	}
+
+	return result, nil
 }
 
 // LabelScore holds label leaderboard information.

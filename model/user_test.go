@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	testEmail 	 = "TEST_EMAIL"
+	testEmail    = "TEST_EMAIL"
 	testPassword = "TEST_PASSWORD"
 )
 
@@ -30,7 +30,7 @@ func TestUser(t *testing.T) {
 func testCreateUser(userRepository UserRepository) func(t *testing.T) {
 	return func(t *testing.T) {
 		user, err := userRepository.CreateNewUser(context.Background(), &models.User{
-			Email: testEmail,
+			Email:    testEmail,
 			Password: testPassword,
 		})
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/ngavinsir/clickbait/models"
 )
@@ -67,6 +68,7 @@ func testInsertLabel(testRepository *testRepository, user *models.User, article 
 		t.Run("Get Count", testGetLabelCount(testRepository, article.ID))
 		t.Run("Delete", testDeleteLabel(testRepository, label.ID, article.ID))
 		t.Run("Get Leaderboard", testGetClickbaitLeaderboard(testRepository, article.ID, user))
+		t.Run("Get progress", testGetLabelProgress(testRepository))
 	}
 }
 
@@ -230,6 +232,28 @@ func testGetClickbaitLeaderboard(testRepository *testRepository, articleID strin
 
 		if got, want := (*leaderboard)[1].Score, uint32(1); got != want {
 			t.Errorf("got leaderboard score %d, want %d", got, want)
+		}
+	}
+}
+
+func testGetLabelProgress(testRepository *testRepository) func(t *testing.T) {
+	return func(t *testing.T) {
+		labelProgressWeeks, err := testRepository.GetLabelProgress(context.Background(), "", time.Now(), 5)
+		if err != nil {
+			t.Error(err)
+		}
+
+		for _, progress := range labelProgressWeeks[0] {
+			if progress.Name == "user1" {
+				if got, want := progress.Progress, int64(1); got != want {
+					t.Errorf("got progress for user1 %d, want %d", got, want)
+				}
+			}
+			if progress.Name == "user2" {
+				if got, want := progress.Progress, int64(2); got != want {
+					t.Errorf("got progress for user2 %d, want %d", got, want)
+				}
+			}
 		}
 	}
 }

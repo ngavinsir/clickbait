@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -127,6 +128,37 @@ func (env *Env) GetLabelLeaderboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, clickbaitLeaderboard)
+}
+
+// GetLabelProgress returns user's labeling progress
+func (env *Env) GetLabelProgress(w http.ResponseWriter, r *http.Request) {
+	labelType := chi.URLParam(r, "labelType")
+	duration := chi.URLParam(r, "duration")
+	durationInt, err := strconv.Atoi(duration)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+
+	start := r.URL.Query().Get("start")
+	startWeek, err := time.Parse(time.RFC3339, start)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+
+	labelProgress, err := env.labelRepository.GetLabelProgress(
+		r.Context(),
+		labelType,
+		startWeek,
+		durationInt,
+	)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+
+	render.JSON(w, r, labelProgress)
 }
 
 // GetLabelScore returns user's label score.

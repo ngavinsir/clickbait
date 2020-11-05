@@ -41,6 +41,7 @@ var cmdServer = &cobra.Command{
 		router.Post("/register", env.Register)
 		router.Post("/login", env.Login)
 		router.Get("/{labelType}/label/leaderboard/{limit}", env.GetLabelLeaderboard)
+		router.Get("/{labelType}/label/progress/{duration}", env.GetLabelProgress)
 
 		router.Group(func(router chi.Router) {
 			router.Use(env.AuthMiddleware)

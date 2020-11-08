@@ -22,6 +22,7 @@ type LabelRepository interface {
 	GetLabelLeaderboard(ctx context.Context, labelType string, limit uint8) (*[]LabelScore, error)
 	GetLabelScore(ctx context.Context, labelType, userID string) (int, error)
 	GetLabelProgress(ctx context.Context, labelType string, startWeek time.Time, duration int) ([][]*LabelProgress, error)
+	GetLabelCount(ctx context.Context, userID string) (int64, error)
 }
 
 // LabelProgress tracks each user labeling progress
@@ -52,6 +53,14 @@ func (db *LabelDatastore) InsertLabel(ctx context.Context, userID string, articl
 
 	if articleLabelCount >= 3 {
 		return nil, errors.New("maximum label reached")
+	}
+
+	thisWeekLabelCount, err := db.GetLabelCount(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if thisWeekLabelCount >= 200 {
+		return nil, errors.New("you have reached your weekly label count limit")
 	}
 
 	label := &models.Label{
@@ -197,6 +206,26 @@ func (db *LabelDatastore) GetLabelProgress(
 	}
 
 	return result, nil
+}
+
+// GetLabelCount returns user's label count this week
+func (db *LabelDatastore) GetLabelCount(ctx context.Context, userID string) (int64, error) {
+
+	type Count struct {
+		Count int64 `boil:"count"`
+	}
+
+	var data Count;
+	if err := queries.Raw(`
+		select count(*) as count
+		from labels
+		where user_id = $1
+	  	and date_trunc('week', created_at) = date_trunc('week', now());
+	`, userID).Bind(ctx, db, &data); err != nil {
+		return 0, err
+	}
+
+	return data.Count, nil
 }
 
 // LabelScore holds label leaderboard information.

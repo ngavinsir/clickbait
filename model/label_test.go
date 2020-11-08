@@ -65,7 +65,7 @@ func testInsertLabel(testRepository *testRepository, user *models.User, article 
 
 		t.Run("Is Labeled", testIsLabeled(testRepository, user.ID, article.ID))
 		t.Run("Get", testGetLabel(testRepository, user.ID, article.ID, label.ID))
-		t.Run("Get Count", testGetLabelCount(testRepository, article.ID))
+		t.Run("Get Count", testGetArticleLabelCount(testRepository, article.ID))
 		t.Run("Delete", testDeleteLabel(testRepository, label.ID, article.ID))
 		t.Run("Get Leaderboard", testGetClickbaitLeaderboard(testRepository, article.ID, user))
 		t.Run("Get progress", testGetLabelProgress(testRepository))
@@ -113,7 +113,7 @@ func testGetLabel(testRepository *testRepository, userID string, articleID strin
 	}
 }
 
-func testGetLabelCount(testRepository *testRepository, articleID string) func(t *testing.T) {
+func testGetArticleLabelCount(testRepository *testRepository, articleID string) func(t *testing.T) {
 	return func(t *testing.T) {
 		labelCount, err := testRepository.GetArticleLabelCount(context.Background(), articleID, "clickbait")
 		if err != nil {
@@ -233,6 +233,8 @@ func testGetClickbaitLeaderboard(testRepository *testRepository, articleID strin
 		if got, want := (*leaderboard)[1].Score, uint32(1); got != want {
 			t.Errorf("got leaderboard score %d, want %d", got, want)
 		}
+
+		t.Run("Get label count", testGetLabelCount(testRepository, user1.ID, user2.ID))
 	}
 }
 
@@ -254,6 +256,26 @@ func testGetLabelProgress(testRepository *testRepository) func(t *testing.T) {
 					t.Errorf("got progress for user2 %d, want %d", got, want)
 				}
 			}
+		}
+	}
+}
+
+func testGetLabelCount(testRepository *testRepository, user1ID, user2ID string) func(t *testing.T) {
+	return func(t *testing.T) {
+		count1, err := testRepository.GetLabelCount(context.Background(), user1ID)
+		if err != nil {
+			t.Error(err)
+		}
+		if got, want := count1, int64(1); got != want {
+			t.Errorf("got label count for user1 %d, want %d", got, want)
+		}
+
+		count2, err := testRepository.GetLabelCount(context.Background(), user2ID)
+		if err != nil {
+			t.Error(err)
+		}
+		if got, want := count2, int64(2); got != want {
+			t.Errorf("got label count for user2 %d, want %d", got, want)
 		}
 	}
 }

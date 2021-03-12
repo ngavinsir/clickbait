@@ -192,6 +192,11 @@ func (db *LabelDatastore) GetLabelProgress(
 	}
 
 	result := make([][]*LabelProgress, duration)
+
+	if len(*labelProgressWeeks) == 0 {
+		return result, nil
+	}
+
 	currentWeek := (*labelProgressWeeks)[0].Week
 	currentIndex := 0
 	for _, labelProgressWeek := range *labelProgressWeeks {
